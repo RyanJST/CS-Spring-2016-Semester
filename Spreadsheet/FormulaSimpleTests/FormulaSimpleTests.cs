@@ -118,7 +118,7 @@ namespace FormulaTestCases
         /// </summary>
         /// <param name="v"></param>
         /// <returns></returns>
-        public double Lookup4(String v)
+        public double Lookup4(string v)
         {
             switch (v)
             {

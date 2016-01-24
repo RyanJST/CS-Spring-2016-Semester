@@ -39,11 +39,12 @@ namespace Formulas
         /// If the formula is syntacticaly invalid, throws a FormulaFormatException with an 
         /// explanatory Message.
         /// </summary>
-        public Formula(String formula)
+
+        string[] formulaArray;
+
+        public Formula(string formula)
         {
-            int leftParenCounter = 0;
-            int rightParenCounter = 0;
-            int test = 0;
+            Regex test = new Regex("^[a-zA-Z][0-9a-zA-Z]");
             if(formula.Length == 0)
             {
                 throw new FormulaFormatException("No tokens detected"); 
@@ -70,6 +71,120 @@ namespace Formulas
         /// </summary>
         public double Evaluate(Lookup lookup)
         {
+            Stack<double> valueStack = new Stack<double>();
+            Stack<string> operatorStack = new Stack<string>();
+            double result = 0;
+            foreach(string s in formulaArray)
+            {
+                result = 0;
+                if(double.TryParse(s, out result))
+                {
+                    if(operatorStack.Peek() == "*")
+                    {
+                        operatorStack.Pop();
+                        result *= valueStack.Pop();
+                    }
+                    else if(operatorStack.Peek() == "/")
+                    {
+                        if (valueStack.Peek() != 0)
+                        {
+                            operatorStack.Pop();
+                            result /= valueStack.Pop();
+                        }
+                        else
+                        {
+                            throw new FormulaEvaluationException("There is a division by zero in your formula.");
+                        }
+                    }
+
+                    else
+                    {
+                        valueStack.Push(result);
+                    }
+                }
+                else if(s == "+" || s == "-")
+                {
+                    if(operatorStack.Peek() == "+")
+                    {
+                        operatorStack.Pop();
+                        result = valueStack.Pop() + valueStack.Pop();
+                        valueStack.Push(result);
+                    }
+                    else
+                    {
+                        operatorStack.Pop();
+                        result = valueStack.Pop() - valueStack.Pop();
+                        valueStack.Push(result);
+                    }
+                    operatorStack.Push(s);
+                }
+
+                else if(s == "*" || s == "/" || s == "(")
+                {
+                    operatorStack.Push(s);
+                }
+
+                else if(s == ")")
+                {
+                    if (operatorStack.Peek() == "+" || s == "-")
+                    {
+                        if (operatorStack.Peek() == "+")
+                        {
+                            operatorStack.Pop();
+                            result = valueStack.Pop() + valueStack.Pop();
+                            valueStack.Push(result);
+                        }
+                        else
+                        {
+                            operatorStack.Pop();
+                            result = valueStack.Pop() - valueStack.Pop();
+                            valueStack.Push(result);
+                        }
+                        operatorStack.Push(s);
+                    }
+
+                    operatorStack.Pop();
+
+                    if(operatorStack.Peek() == "*" || operatorStack.Peek() == "/")
+                    {
+                        if(operatorStack.Peek() == "*")
+                        {
+                            operatorStack.Pop();
+                            result = valueStack.Pop() * valueStack.Pop();
+                            valueStack.Push(result);
+                        }
+                        else
+                        {
+                            if (valueStack.Peek() != 0)
+                            {
+                                operatorStack.Pop();
+                                result /= valueStack.Pop();
+                            }
+                            else
+                            {
+                                throw new FormulaEvaluationException("There is a division by zero in your formula.");
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                                           
+                }
+            }
+            if (operatorStack.Count != 0)
+            {
+                if(operatorStack.Peek() == "+")
+                {
+                    return valueStack.Pop() + valueStack.Pop();
+                }   
+                else if(operatorStack.Peek() == "-")
+                {
+                    return valueStack.Pop() - valueStack.Pop();
+                } 
+            }
+
+            return valueStack.Pop();
             
         }
 
@@ -79,22 +194,22 @@ namespace Formulas
         /// zero or more digits and/or letters, a double literal, and anything that doesn't
         /// match one of those patterns.  There are no empty tokens, and no token contains white space.
         /// </summary>
-        private static IEnumerable<string> GetTokens(String formula)
+        private static IEnumerable<string> GetTokens(string formula)
         {
             // Patterns for individual tokens
-            String lpPattern = @"\(";
-            String rpPattern = @"\)";
-            String opPattern = @"[\+\-*/]";
-            String varPattern = @"[a-zA-Z][0-9a-zA-Z]*";
-            String doublePattern = @"(?: \d+\.\d* | \d*\.\d+ | \d+ ) (?: e[\+-]?\d+)?";
-            String spacePattern = @"\s+";
+            string lpPattern = @"\(";
+            string rpPattern = @"\)";
+            string opPattern = @"[\+\-*/]";
+            string varPattern = @"[a-zA-Z][0-9a-zA-Z]*";
+            string doublePattern = @"(?: \d+\.\d* | \d*\.\d+ | \d+ ) (?: e[\+-]?\d+)?";
+            string spacePattern = @"\s+";
 
             // Overall pattern
-            String pattern = String.Format("({0}) | ({1}) | ({2}) | ({3}) | ({4}) | ({5})",
+            string pattern = string.Format("({0}) | ({1}) | ({2}) | ({3}) | ({4}) | ({5})",
                                             lpPattern, rpPattern, opPattern, varPattern, doublePattern, spacePattern);
 
             // Enumerate matching tokens that don't consist solely of white space.
-            foreach (String s in Regex.Split(formula, pattern, RegexOptions.IgnorePatternWhitespace))
+            foreach (string s in Regex.Split(formula, pattern, RegexOptions.IgnorePatternWhitespace))
             {
                 if (!Regex.IsMatch(s, @"^\s*$", RegexOptions.Singleline))
                 {
@@ -124,7 +239,7 @@ namespace Formulas
         /// undefined variable.
         /// </summary>
         /// <param name="variable"></param>
-        public UndefinedVariableException(String variable)
+        public UndefinedVariableException(string variable)
             : base(variable)
         {
         }
@@ -138,7 +253,7 @@ namespace Formulas
         /// <summary>
         /// Constructs a FormulaFormatException containing the explanatory message.
         /// </summary>
-        public FormulaFormatException(String message) : base(message)
+        public FormulaFormatException(string message) : base(message)
         {
 
         }
@@ -152,7 +267,7 @@ namespace Formulas
         /// <summary>
         /// Constructs a FormulaEvaluationException containing the explanatory message.
         /// </summary>
-        public FormulaEvaluationException(String message) : base(message)
+        public FormulaEvaluationException(string message) : base(message)
         {
         }
     }
