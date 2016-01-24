@@ -46,6 +46,13 @@ namespace FormulaTestCases
             Formula f = new Formula("2 3");
         }
 
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void Construct4()
+        {
+            Formula f = new Formula("");
+        }
+
         /// <summary>
         /// Makes sure that "2+3" evaluates to 5.  Since the Formula
         /// contains no variables, the delegate passed in as the

@@ -41,6 +41,23 @@ namespace Formulas
         /// </summary>
         public Formula(String formula)
         {
+            int leftParenCounter = 0;
+            int rightParenCounter = 0;
+            int test = 0;
+            if(formula.Length == 0)
+            {
+                throw new FormulaFormatException("No tokens detected"); 
+            }
+
+            if(formula.Count(x => x == '(') != formula.Count(x => x == ')'))
+            {
+                throw new FormulaFormatException("Parenthese do not match")
+            }
+            
+          
+
+
+
         }
         /// <summary>
         /// Evaluates this Formula, using the Lookup delegate to determine the values of variables.  (The
@@ -53,7 +70,7 @@ namespace Formulas
         /// </summary>
         public double Evaluate(Lookup lookup)
         {
-            return 0;
+            
         }
 
         /// <summary>
@@ -123,6 +140,7 @@ namespace Formulas
         /// </summary>
         public FormulaFormatException(String message) : base(message)
         {
+
         }
     }
 
