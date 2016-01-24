@@ -44,19 +44,30 @@ namespace Formulas
 
         public Formula(string formula)
         {
-            Regex test = new Regex("^[a-zA-Z][0-9a-zA-Z]");
+            int leftParen = 0;
+            int rightParen = 0;
+
             if(formula.Length == 0)
             {
                 throw new FormulaFormatException("No tokens detected"); 
             }
 
-            if(formula.Count(x => x == '(') != formula.Count(x => x == ')'))
-            {
-                throw new FormulaFormatException("Parenthese do not match")
-            }
+            char[] formChar = formula.ToCharArray();
             
-          
+            if(!char.IsLetterOrDigit(formChar[0]) || formChar[0] != '(')
+            {
+                throw new FormulaFormatException("Starting token must be a: number, variable, or opening Parenthese");
+            }
 
+            if (!char.IsLetterOrDigit(formChar[formChar.Count() -1]) || formChar[0] != ')')
+            {
+                throw new FormulaFormatException("Ending token must be a: number, variable, or opening Parenthese");
+            }
+
+            for(int i = 0; i < formChar.Length; i++)
+            {
+
+            }
 
 
         }
@@ -169,7 +180,28 @@ namespace Formulas
                 }
                 else
                 {
-                                           
+                    if (operatorStack.Peek() == "*")
+                    {
+                        operatorStack.Pop();
+                        result = valueStack.Pop() * lookup(s);
+                    }
+                    else if (operatorStack.Peek() == "/")
+                    {
+                        if (valueStack.Peek() != 0)
+                        {
+                            operatorStack.Pop();
+                            valueStack.Push(lookup(s) / valueStack.Pop());
+                        }
+                        else
+                        {
+                            throw new FormulaEvaluationException("There is a division by zero in your formula.");
+                        }
+                    }
+                    else
+                    {
+                        valueStack.Push(lookup(s));
+                    }
+                                      
                 }
             }
             if (operatorStack.Count != 0)
