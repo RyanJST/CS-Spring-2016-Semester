@@ -214,15 +214,14 @@ namespace Formulas
                         if (operatorStack.Peek() == "*")
                         {
                             operatorStack.Pop();
-                            result = valueStack.Pop() * valueStack.Pop();
-                            valueStack.Push(result);
+                            valueStack.Push(valueStack.Pop() * valueStack.Pop());
                         }
                         else
                         {
                             if (valueStack.Peek() != 0)
                             {
                                 operatorStack.Pop();
-                                result /= valueStack.Pop();
+                                valueStack.Push((valueStack.Pop()/valueStack.Pop()));
                             }
                             else
                             {
