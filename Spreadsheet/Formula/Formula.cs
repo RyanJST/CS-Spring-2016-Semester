@@ -19,7 +19,7 @@ namespace Formulas
     /// </summary>
     public class Formula
     {
-        /// <summary>
+        string[] formulaArray = new string [0];
         /// Creates a Formula from a string that consists of a standard infix expression composed
         /// from non-negative floating-point numbers (using C#-like syntax for double/int literals), 
         /// variable symbols (a letter followed by zero or more letters and/or digits), left and right
@@ -40,7 +40,7 @@ namespace Formulas
         /// explanatory Message.
         /// </summary>
 
-        string[] formulaArray;
+
 
         public Formula(string formula)
         {
@@ -59,16 +59,44 @@ namespace Formulas
                 throw new FormulaFormatException("Starting token must be a: number, variable, or opening Parenthese");
             }
 
-            if (!char.IsLetterOrDigit(formChar[formChar.Count() -1]) || formChar[0] != ')')
+            if (!char.IsLetterOrDigit(formChar[formChar.Count() -1]) || formChar[formChar.Count() - 1] != ')')
             {
                 throw new FormulaFormatException("Ending token must be a: number, variable, or opening Parenthese");
             }
 
-            for(int i = 0; i < formChar.Length; i++)
+            if(formula.Count(x => x == '(') != formula.Count(x => x == ')'))
             {
-
+                throw new FormulaFormatException("The number of open and close parenthesis do not match");
             }
 
+
+            for(int i = 0; i < formChar.Length -1; i++)
+            {
+                if(formChar[i] == '(')
+                {
+                    if (!char.IsLetterOrDigit(formChar[i + 1]) || formChar[i + 1] == '(')
+                    {
+                        leftParen++;
+                    }
+                    else
+                    {
+                        throw new FormulaFormatException("The only thing that can follow a parenthese is a number, variable, or opening parenthese");
+                    }
+                }
+
+                if (formChar[i -1] == ')')
+                {
+                    rightParen++;
+                }
+
+                if(rightParen > leftParen)
+                {
+                    throw new FormulaFormatException("There are more closing parentheses than open parenthese at this point");
+                }
+            }
+
+            int whiteCount = formula.Count(x => x == ' ');
+            formulaArray = new string[formChar.Length - whiteCount];
 
         }
         /// <summary>
@@ -93,14 +121,14 @@ namespace Formulas
                     if(operatorStack.Peek() == "*")
                     {
                         operatorStack.Pop();
-                        result *= valueStack.Pop();
+                        valueStack.Push(result * valueStack.Pop());
                     }
                     else if(operatorStack.Peek() == "/")
                     {
                         if (valueStack.Peek() != 0)
                         {
                             operatorStack.Pop();
-                            result /= valueStack.Pop();
+                            valueStack.Push(result / valueStack.Pop());
                         }
                         else
                         {
@@ -118,14 +146,12 @@ namespace Formulas
                     if(operatorStack.Peek() == "+")
                     {
                         operatorStack.Pop();
-                        result = valueStack.Pop() + valueStack.Pop();
-                        valueStack.Push(result);
+                        valueStack.Push(valueStack.Pop() + valueStack.Pop());
                     }
                     else
                     {
                         operatorStack.Pop();
-                        result = valueStack.Pop() - valueStack.Pop();
-                        valueStack.Push(result);
+                        valueStack.Push(valueStack.Pop() - valueStack.Pop(););
                     }
                     operatorStack.Push(s);
                 }
@@ -142,16 +168,13 @@ namespace Formulas
                         if (operatorStack.Peek() == "+")
                         {
                             operatorStack.Pop();
-                            result = valueStack.Pop() + valueStack.Pop();
-                            valueStack.Push(result);
+                            valueStack.Push(valueStack.Pop() + valueStack.Pop(););
                         }
                         else
                         {
                             operatorStack.Pop();
-                            result = valueStack.Pop() - valueStack.Pop();
-                            valueStack.Push(result);
+                            valueStack.Push(valueStack.Pop() - valueStack.Pop(););
                         }
-                        operatorStack.Push(s);
                     }
 
                     operatorStack.Pop();
@@ -178,12 +201,12 @@ namespace Formulas
                         }
                     }
                 }
-                else
+                else //start of variable case
                 {
                     if (operatorStack.Peek() == "*")
                     {
                         operatorStack.Pop();
-                        result = valueStack.Pop() * lookup(s);
+                        valueStack.Push( valueStack.Pop() * lookup(s));
                     }
                     else if (operatorStack.Peek() == "/")
                     {
