@@ -19,7 +19,7 @@ namespace Formulas
     /// </summary>
     public class Formula
     {
-        string[] formulaArray = new string [0];
+        List<string> formulaArray = new List<string>();
         /// Creates a Formula from a string that consists of a standard infix expression composed
         /// from non-negative floating-point numbers (using C#-like syntax for double/int literals), 
         /// variable symbols (a letter followed by zero or more letters and/or digits), left and right
@@ -47,6 +47,7 @@ namespace Formulas
             int leftParen = 0;
             int rightParen = 0;
 
+
             if(formula.Length == 0)
             {
                 throw new FormulaFormatException("No tokens detected"); 
@@ -72,21 +73,34 @@ namespace Formulas
 
             for(int i = 0; i < formChar.Length -1; i++)
             {
-                if(formChar[i] == '(')
+                if(formChar[i] == '(' || formChar[i] == '+' || formChar[i] == '*' || formChar[i] == '-' || formChar[i] == '/')
                 {
-                    if (!char.IsLetterOrDigit(formChar[i + 1]) || formChar[i + 1] == '(')
+                    if (char.IsLetterOrDigit(formChar[i + 1]) || formChar[i + 1] == '(')
                     {
-                        leftParen++;
+                        if (formChar[i] == '(')
+                        {
+                            leftParen++;
+                        }
+                    }
+                    else
+                    {
+                        throw new FormulaFormatException("The only thing that can follow a parenthese or operator is a number, variable, or opening parenthese");
+                    }
+                }
+                
+                if (char.IsLetterOrDigit(formChar[i + 1]) || formChar[i + 1] == ')')
+                {
+                    if (formChar[i+1] == ')' || formChar[i + 1] == '+' || formChar[i + 1] == '*' || formChar[i + 1] == '-' || formChar[i + 1] == '/')
+                    {
+                        if (formChar[i + 1] == ')')
+                        {
+                            rightParen++;
+                        }
                     }
                     else
                     {
                         throw new FormulaFormatException("The only thing that can follow a parenthese is a number, variable, or opening parenthese");
                     }
-                }
-
-                if (formChar[i -1] == ')')
-                {
-                    rightParen++;
                 }
 
                 if(rightParen > leftParen)
@@ -95,8 +109,11 @@ namespace Formulas
                 }
             }
 
-            int whiteCount = formula.Count(x => x == ' ');
-            formulaArray = new string[formChar.Length - whiteCount];
+
+            foreach(string t in GetTokens(formula))
+            {
+                formulaArray.Add(t);
+            }
 
         }
         /// <summary>
@@ -151,7 +168,7 @@ namespace Formulas
                     else
                     {
                         operatorStack.Pop();
-                        valueStack.Push(valueStack.Pop() - valueStack.Pop(););
+                        valueStack.Push(valueStack.Pop() - valueStack.Pop());
                     }
                     operatorStack.Push(s);
                 }
@@ -168,12 +185,12 @@ namespace Formulas
                         if (operatorStack.Peek() == "+")
                         {
                             operatorStack.Pop();
-                            valueStack.Push(valueStack.Pop() + valueStack.Pop(););
+                            valueStack.Push(valueStack.Pop() + valueStack.Pop());
                         }
                         else
                         {
                             operatorStack.Pop();
-                            valueStack.Push(valueStack.Pop() - valueStack.Pop(););
+                            valueStack.Push(valueStack.Pop() - valueStack.Pop());
                         }
                     }
 
