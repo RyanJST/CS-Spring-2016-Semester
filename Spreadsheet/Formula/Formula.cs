@@ -46,6 +46,8 @@ namespace Formulas
         {
             int leftParen = 0;
             int rightParen = 0;
+            double test;
+
 
 
             if(formula.Length == 0)
@@ -53,14 +55,17 @@ namespace Formulas
                 throw new FormulaFormatException("No tokens detected"); 
             }
 
-            char[] formChar = formula.ToCharArray();
+            foreach (string t in GetTokens(formula))
+            {
+                formulaArray.Add(t);
+            }
             
-            if(!char.IsLetterOrDigit(formChar[0]) || formChar[0] != '(')
+            if(!char.IsLetter(formula[0]) && !double.TryParse(formula[0].ToString(), out test) && formula[0] != '(')
             {
                 throw new FormulaFormatException("Starting token must be a: number, variable, or opening Parenthese");
             }
 
-            if (!char.IsLetterOrDigit(formChar[formChar.Count() -1]) || formChar[formChar.Count() - 1] != ')')
+            if (!char.IsLetter(formula[formula.Count() -1]) && !double.TryParse(formula[formula.Count() -1].ToString(), out test) && formula[formula.Count() - 1] != ')')
             {
                 throw new FormulaFormatException("Ending token must be a: number, variable, or opening Parenthese");
             }
@@ -71,13 +76,13 @@ namespace Formulas
             }
 
 
-            for(int i = 0; i < formChar.Length -1; i++)
+            for(int i = 0; i < formula.Length -1; i++)
             {
-                if(formChar[i] == '(' || formChar[i] == '+' || formChar[i] == '*' || formChar[i] == '-' || formChar[i] == '/')
+                if(formula[i] == '(' || formula[i] == '+' || formula[i] == '*' || formula[i] == '-' || formula[i] == '/')
                 {
-                    if (char.IsLetterOrDigit(formChar[i + 1]) || formChar[i + 1] == '(')
+                    if (char.IsLetterOrDigit(formula[i + 1]) || formula[i + 1] == '(')
                     {
-                        if (formChar[i] == '(')
+                        if (formula[i] == '(')
                         {
                             leftParen++;
                         }
@@ -88,11 +93,11 @@ namespace Formulas
                     }
                 }
                 
-                if (char.IsLetterOrDigit(formChar[i + 1]) || formChar[i + 1] == ')')
+                if ((char.IsLetterOrDigit(formula[i + 1]) || formula[i + 1] == ')') && i+1 != (formula.Count()))
                 {
-                    if (formChar[i+1] == ')' || formChar[i + 1] == '+' || formChar[i + 1] == '*' || formChar[i + 1] == '-' || formChar[i + 1] == '/')
+                    if (formula[i+1] == ')' || formula[i + 1] == '+' || formula[i + 1] == '*' || formula[i + 1] == '-' || formula[i + 1] == '/')
                     {
-                        if (formChar[i + 1] == ')')
+                        if (formula[i + 1] == ')')
                         {
                             rightParen++;
                         }
@@ -110,10 +115,7 @@ namespace Formulas
             }
 
 
-            foreach(string t in GetTokens(formula))
-            {
-                formulaArray.Add(t);
-            }
+   
 
         }
         /// <summary>
@@ -135,12 +137,12 @@ namespace Formulas
                 result = 0;
                 if(double.TryParse(s, out result))
                 {
-                    if(operatorStack.Peek() == "*")
+                    if(operatorStack.Count() != 0 && operatorStack.Peek() == "*" )
                     {
                         operatorStack.Pop();
                         valueStack.Push(result * valueStack.Pop());
                     }
-                    else if(operatorStack.Peek() == "/")
+                    else if(operatorStack.Count() != 0 && operatorStack.Peek() == "/")
                     {
                         if (valueStack.Peek() != 0)
                         {
@@ -160,15 +162,19 @@ namespace Formulas
                 }
                 else if(s == "+" || s == "-")
                 {
-                    if(operatorStack.Peek() == "+")
+                    if(operatorStack.Count() != 0 && operatorStack.Peek() == "+")
                     {
                         operatorStack.Pop();
                         valueStack.Push(valueStack.Pop() + valueStack.Pop());
                     }
                     else
                     {
-                        operatorStack.Pop();
-                        valueStack.Push(valueStack.Pop() - valueStack.Pop());
+                        if (operatorStack.Count() != 0 && operatorStack.Peek() == "-")
+                        {
+                            operatorStack.Pop();
+                            valueStack.Push(valueStack.Pop() - valueStack.Pop());
+                        }
+                        
                     }
                     operatorStack.Push(s);
                 }
@@ -180,7 +186,7 @@ namespace Formulas
 
                 else if(s == ")")
                 {
-                    if (operatorStack.Peek() == "+" || s == "-")
+                    if (operatorStack.Count() != 0 && (operatorStack.Peek() == "+" || s == "-"))
                     {
                         if (operatorStack.Peek() == "+")
                         {
@@ -196,7 +202,7 @@ namespace Formulas
 
                     operatorStack.Pop();
 
-                    if(operatorStack.Peek() == "*" || operatorStack.Peek() == "/")
+                    if(operatorStack.Count() != 0 && (operatorStack.Peek() == "*" || operatorStack.Peek() == "/"))
                     {
                         if(operatorStack.Peek() == "*")
                         {
@@ -220,12 +226,13 @@ namespace Formulas
                 }
                 else //start of variable case
                 {
-                    if (operatorStack.Peek() == "*")
+                    if(s == UndefinedVariableException) 
+                    if (operatorStack.Count() != 0 && operatorStack.Peek() == "*")
                     {
                         operatorStack.Pop();
                         valueStack.Push( valueStack.Pop() * lookup(s));
                     }
-                    else if (operatorStack.Peek() == "/")
+                    else if (operatorStack.Count() != 0 && operatorStack.Peek() == "/")
                     {
                         if (valueStack.Peek() != 0)
                         {
