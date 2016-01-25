@@ -19,7 +19,7 @@ namespace Formulas
     /// </summary>
     public class Formula
     {
-        List<string> formulaArray = new List<string>();
+        string [] formulaArray = new string [0];
         /// Creates a Formula from a string that consists of a standard infix expression composed
         /// from non-negative floating-point numbers (using C#-like syntax for double/int literals), 
         /// variable symbols (a letter followed by zero or more letters and/or digits), left and right
@@ -47,42 +47,45 @@ namespace Formulas
             int leftParen = 0;
             int rightParen = 0;
             double test;
+            int whiteCount = (formula.Count(x => x == ' '));
+            int j = 0;
 
-
+            formulaArray = new string[formula.Length - whiteCount];
+            
+            foreach(string s in GetTokens(formula))
+            {
+                formulaArray[j] = s;
+                j++;
+            }
 
             if(formula.Length == 0)
             {
                 throw new FormulaFormatException("No tokens detected"); 
             }
-
-            foreach (string t in GetTokens(formula))
-            {
-                formulaArray.Add(t);
-            }
             
-            if(!char.IsLetter(formula[0]) && !double.TryParse(formula[0].ToString(), out test) && formula[0] != '(')
+            if(!char.IsLetterOrDigit(formula[0]) && formulaArray[0] != "(")
             {
                 throw new FormulaFormatException("Starting token must be a: number, variable, or opening Parenthese");
             }
 
-            if (!char.IsLetter(formula[formula.Count() -1]) && !double.TryParse(formula[formula.Count() -1].ToString(), out test) && formula[formula.Count() - 1] != ')')
+            if (!char.IsLetterOrDigit(formula[formula.Count() -1]) && formulaArray[formulaArray.Count()] != ")")
             {
                 throw new FormulaFormatException("Ending token must be a: number, variable, or opening Parenthese");
             }
 
-            if(formula.Count(x => x == '(') != formula.Count(x => x == ')'))
+            if(formulaArray.Count(x => x == "(") != formulaArray.Count(x => x == ")"))
             {
                 throw new FormulaFormatException("The number of open and close parenthesis do not match");
             }
 
 
-            for(int i = 0; i < formula.Length -1; i++)
+            for(int i = 0; i < formulaArray.Length; i++)
             {
-                if(formula[i] == '(' || formula[i] == '+' || formula[i] == '*' || formula[i] == '-' || formula[i] == '/')
+                if(formulaArray[i] == "(" || formulaArray[i] == "+" || formulaArray[i] == "*" || formulaArray[i] == "-" || formulaArray[i] == "/")
                 {
-                    if (char.IsLetterOrDigit(formula[i + 1]) || formula[i + 1] == '(')
+                    if (i +1 < formulaArray.Count() && formulaArray[i + 1] != null && (char.IsLetterOrDigit(formulaArray[i + 1].ToCharArray()[0]) || formulaArray[i + 1] == "("))
                     {
-                        if (formula[i] == '(')
+                        if (formulaArray[i] == "(")
                         {
                             leftParen++;
                         }
@@ -93,18 +96,22 @@ namespace Formulas
                     }
                 }
                 
-                if ((char.IsLetterOrDigit(formula[i + 1]) || formula[i + 1] == ')') && i+1 != (formula.Count()))
+                if (i + 1 < (formulaArray.Length) && formulaArray[i + 1] != null && (char.IsLetterOrDigit(formulaArray[i].ToCharArray()[0]) || formulaArray[i] == ")"))
                 {
-                    if (formula[i+1] == ')' || formula[i + 1] == '+' || formula[i + 1] == '*' || formula[i + 1] == '-' || formula[i + 1] == '/')
+                    if (char.IsLetter(formulaArray[i].ToCharArray()[0]) && formulaArray[i + 1] != null && double.TryParse(formulaArray[i + 1].ToString(), out test))
                     {
-                        if (formula[i + 1] == ')')
+
+                    }
+                    else if (formulaArray[i+1] == ")" || formulaArray[i + 1] == "+" || formulaArray[i + 1] == "*" || formulaArray[i + 1] == "-" || formulaArray[i + 1] == "/")
+                    {
+                        if (formulaArray[i] == ")")
                         {
                             rightParen++;
                         }
                     }
                     else
                     {
-                        throw new FormulaFormatException("The only thing that can follow a parenthese is a number, variable, or opening parenthese");
+                        throw new FormulaFormatException("The only thing that can follow a number, variable, or opening parenthese is an operator or closing parenthese");
                     }
                 }
 
@@ -135,19 +142,19 @@ namespace Formulas
             foreach(string s in formulaArray)
             {
                 result = 0;
-                if(double.TryParse(s, out result))
+                if (double.TryParse(s, out result))
                 {
-                    if(operatorStack.Count() != 0 && operatorStack.Peek() == "*" )
+                    if (operatorStack.Count() != 0 && operatorStack.Peek() == "*")
                     {
                         operatorStack.Pop();
                         valueStack.Push(result * valueStack.Pop());
                     }
-                    else if(operatorStack.Count() != 0 && operatorStack.Peek() == "/")
+                    else if (operatorStack.Count() != 0 && operatorStack.Peek() == "/")
                     {
                         if (valueStack.Peek() != 0)
                         {
                             operatorStack.Pop();
-                            valueStack.Push(result / valueStack.Pop());
+                            valueStack.Push(valueStack.Pop() / result);
                         }
                         else
                         {
@@ -160,9 +167,9 @@ namespace Formulas
                         valueStack.Push(result);
                     }
                 }
-                else if(s == "+" || s == "-")
+                else if (s == "+" || s == "-")
                 {
-                    if(operatorStack.Count() != 0 && operatorStack.Peek() == "+")
+                    if (operatorStack.Count() != 0 && operatorStack.Peek() == "+")
                     {
                         operatorStack.Pop();
                         valueStack.Push(valueStack.Pop() + valueStack.Pop());
@@ -174,17 +181,17 @@ namespace Formulas
                             operatorStack.Pop();
                             valueStack.Push(valueStack.Pop() - valueStack.Pop());
                         }
-                        
+
                     }
                     operatorStack.Push(s);
                 }
 
-                else if(s == "*" || s == "/" || s == "(")
+                else if (s == "*" || s == "/" || s == "(")
                 {
                     operatorStack.Push(s);
                 }
 
-                else if(s == ")")
+                else if (s == ")")
                 {
                     if (operatorStack.Count() != 0 && (operatorStack.Peek() == "+" || s == "-"))
                     {
@@ -202,9 +209,9 @@ namespace Formulas
 
                     operatorStack.Pop();
 
-                    if(operatorStack.Count() != 0 && (operatorStack.Peek() == "*" || operatorStack.Peek() == "/"))
+                    if (operatorStack.Count() != 0 && (operatorStack.Peek() == "*" || operatorStack.Peek() == "/"))
                     {
-                        if(operatorStack.Peek() == "*")
+                        if (operatorStack.Peek() == "*")
                         {
                             operatorStack.Pop();
                             result = valueStack.Pop() * valueStack.Pop();
@@ -226,29 +233,34 @@ namespace Formulas
                 }
                 else //start of variable case
                 {
-                    if(s == UndefinedVariableException) 
-                    if (operatorStack.Count() != 0 && operatorStack.Peek() == "*")
-                    {
-                        operatorStack.Pop();
-                        valueStack.Push( valueStack.Pop() * lookup(s));
-                    }
-                    else if (operatorStack.Count() != 0 && operatorStack.Peek() == "/")
-                    {
-                        if (valueStack.Peek() != 0)
+                    try {
+                        if (s != null && (operatorStack.Count() != 0 && operatorStack.Peek() == "*"))
                         {
                             operatorStack.Pop();
-                            valueStack.Push(lookup(s) / valueStack.Pop());
+                            valueStack.Push(valueStack.Pop() * lookup(s));
                         }
-                        else
+                        else if (s != null && (operatorStack.Count() != 0 && operatorStack.Peek() == "/"))
                         {
-                            throw new FormulaEvaluationException("There is a division by zero in your formula.");
+                            if (valueStack.Peek() != 0)
+                            {
+                                operatorStack.Pop();
+                                valueStack.Push(valueStack.Pop() / lookup(s) );
+                            }
+                            else
+                            {
+                                throw new FormulaEvaluationException("There is a division by zero in your formula.");
+                            }
                         }
-                    }
-                    else
+                        else if (s != null)
+                        {
+                            valueStack.Push(lookup(s));
+                        }
+
+                        }
+                    catch(UndefinedVariableException)
                     {
-                        valueStack.Push(lookup(s));
+                        throw new FormulaEvaluationException (s + " is undefined.");
                     }
-                                      
                 }
             }
             if (operatorStack.Count != 0)
