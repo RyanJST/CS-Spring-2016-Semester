@@ -20,7 +20,12 @@ namespace Formulas
     /// </summary>
     public class Formula
     {
+        /// <summary>
+        /// A list variable that will hold the formula.  The constructor uses the getTokens() method to add the tokenized formula
+        /// to this and the Evalute() method uses this variable to run through the evalution process on the formula.
+        /// </summary>
         List<string> formulaArray = new List<string>();
+        ///<summary>
         /// Creates a Formula from a string that consists of a standard infix expression composed
         /// from non-negative floating-point numbers (using C#-like syntax for double/int literals), 
         /// variable symbols (a letter followed by zero or more letters and/or digits), left and right
@@ -39,6 +44,8 @@ namespace Formulas
         /// 
         /// If the formula is syntacticaly invalid, throws a FormulaFormatException with an 
         /// explanatory Message.
+        /// 
+        /// <param name="formula">Formula taken in by the constructor to be evaluted.</param>
         /// </summary>
 
 
@@ -49,67 +56,65 @@ namespace Formulas
             int rightParen = 0;
             double test;
             int j = 0;
-            
-            foreach(string s in GetTokens(formula))
-            {
-                formulaArray.Add(s);
-            }
 
-            if(formula.Length == 0)
+            if(formula.Length == 0) //Tests to see if there is anything in the formula string, if not, there is no formula to work on.
             {
                 throw new FormulaFormatException("No tokens detected"); 
             }
             
-            if(!char.IsLetterOrDigit(formula[0]) && formulaArray[0] != "(")
+            if(!char.IsLetterOrDigit(formula[0]) && formula[0] != '(') //Checks to see if the first token is a: number, variable, or opening parenthesis.
             {
                 throw new FormulaFormatException("Starting token must be a: number, variable, or opening Parenthese");
             }
 
-            if (!char.IsLetterOrDigit(formula[formula.Count() -1]) && formulaArray[formulaArray.Count()] != ")")
+            if (!char.IsLetterOrDigit(formula[formula.Count() -1]) && formula[formula.Count()] != ')') // Checks to see if the ending token is a number, variable, or closing parenthesis
             {
-                throw new FormulaFormatException("Ending token must be a: number, variable, or opening Parenthese");
+                throw new FormulaFormatException("Ending token must be a: number, variable, or closing Parenthese");
             }
 
-            if(formulaArray.Count(x => x == "(") != formulaArray.Count(x => x == ")"))
+            if(formula.Count(x => x == '(') != formula.Count(x => x == ')')) //Checks to see the the open and close parenthesis are balanced
             {
                 throw new FormulaFormatException("The number of open and close parenthesis do not match");
             }
 
-            for(int i = 0; i < formulaArray.Count() -1; i++)
+            foreach (string s in GetTokens(formula))  //Adds the formula put in, to the FormulaArray variable, using the GetTokens() methood.
+            {
+                formulaArray.Add(s);
+            }
+
+            for (int i = 0; i < formulaArray.Count() -1; i++)
             {
                 
                 if(formulaArray[i] == "(" || formulaArray[i] == "+" || formulaArray[i] == "*" || formulaArray[i] == "-" || formulaArray[i] == "/")
                 {
-                    if (char.IsLetterOrDigit(formulaArray[i + 1][0]) || formulaArray[i + 1] == "(")
+                    if (!char.IsLetterOrDigit(formulaArray[i + 1][0]) &&  formulaArray[i + 1] != "(")
+                    {
+                        throw new FormulaFormatException("The only thing that can follow a parenthese or operator is a number, variable, or opening parenthese");
+                    }
+                    else
                     {
                         if (formulaArray[i] == "(")
                         {
                             leftParen++;
                         }
-                    }
-                    else
-                    {
-                        throw new FormulaFormatException("The only thing that can follow a parenthese or operator is a number, variable, or opening parenthese");
+                        
                     }
                 }
                 
                 if ((char.IsLetterOrDigit(formulaArray[i][0]) || formulaArray[i] == ")"))
                 {
-                    if (char.IsLetter(formulaArray[i][0]) && double.TryParse(formulaArray[i + 1].ToString(), out test))
+                    if (!(char.IsLetter(formulaArray[i][0]) && double.TryParse(formulaArray[i + 1].ToString(), out test)) && !(formulaArray[i + 1] == ")" || formulaArray[i + 1] == "+" || formulaArray[i + 1] == "*" || formulaArray[i + 1] == "-" || formulaArray[i + 1] == "/"))
                     {
-
+                        throw new FormulaFormatException("The only thing that can follow a number, variable, or opening parenthese is an operator or closing parenthese");
                     }
-                    else if (formulaArray[i+1] == ")" || formulaArray[i + 1] == "+" || formulaArray[i + 1] == "*" || formulaArray[i + 1] == "-" || formulaArray[i + 1] == "/")
+                    else 
                     {
                         if (formulaArray[i] == ")")
                         {
                             rightParen++;
                         }
                     }
-                    else
-                    {
-                        throw new FormulaFormatException("The only thing that can follow a number, variable, or opening parenthese is an operator or closing parenthese");
-                    }
+                    
                 }
 
                 if(rightParen > leftParen)
@@ -131,7 +136,7 @@ namespace Formulas
         {
             Stack<double> valueStack = new Stack<double>();
             Stack<string> operatorStack = new Stack<string>();
-            double result = 0;
+            double result;
             foreach(string s in formulaArray)
             {
                 result = 0;
@@ -226,12 +231,12 @@ namespace Formulas
                 else //start of variable case
                 {
                     try {
-                        if (s != null && (operatorStack.Count() != 0 && operatorStack.Peek() == "*"))
+                        if (operatorStack.Count() != 0 && operatorStack.Peek() == "*")
                         {
                             operatorStack.Pop();
                             valueStack.Push(valueStack.Pop() * lookup(s));
                         }
-                        else if (s != null && (operatorStack.Count() != 0 && operatorStack.Peek() == "/"))
+                        else if (operatorStack.Count() != 0 && operatorStack.Peek() == "/")
                         {
                             if (valueStack.Peek() != 0)
                             {
@@ -243,7 +248,7 @@ namespace Formulas
                                 throw new FormulaEvaluationException("There is a division by zero in your formula.");
                             }
                         }
-                        else if (s != null)
+                        else
                         {
                             valueStack.Push(lookup(s));
                         }
