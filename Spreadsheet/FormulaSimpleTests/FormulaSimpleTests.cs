@@ -45,7 +45,9 @@ namespace FormulaTestCases
         {
             Formula f = new Formula("2 3");
         }
-
+        /// <summary>
+        /// Syntax error where there is no formula
+        /// </summary>
         [TestMethod]
         [ExpectedException(typeof(FormulaFormatException))]
         public void Construct4()
@@ -60,6 +62,13 @@ namespace FormulaTestCases
             Formula f = new Formula("-5");
         }
 
+
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void Construct6()
+        {
+            Formula f = new Formula("5-");
+        }
         /// <summary>
         /// Makes sure that "2+3" evaluates to 5.  Since the Formula
         /// contains no variables, the delegate passed in as the
@@ -122,10 +131,19 @@ namespace FormulaTestCases
         }
 
         [TestMethod]
+        
         public void Evaluate6()
         {
             Formula f = new Formula("(x * x + y) * (z / y) * 1.0");
             Assert.AreEqual(f.Evaluate(Lookup4), 29.3333326, 1e-6);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(FormulaEvaluationException))]
+        public void Evalute7()
+        {
+            Formula f = new Formula("5/0 + 1 -9");
+            Assert.AreEqual(f.Evaluate(Lookup4), 0, 1e-6);
         }
 
         /// <summary>

@@ -55,7 +55,6 @@ namespace Formulas
             int leftParen = 0;
             int rightParen = 0;
             double test;
-            int j = 0;
 
             if(formula.Length == 0) //Tests to see if there is anything in the formula string, if not, there is no formula to work on.
             {
@@ -67,7 +66,7 @@ namespace Formulas
                 throw new FormulaFormatException("Starting token must be a: number, variable, or opening Parenthese");
             }
 
-            if (!char.IsLetterOrDigit(formula[formula.Count() -1]) && formula[formula.Count()] != ')') // Checks to see if the ending token is a number, variable, or closing parenthesis
+            if (!char.IsLetterOrDigit(formula[formula.Count() -1]) && formula[formula.Count() -1] != ')') // Checks to see if the ending token is a number, variable, or closing parenthesis
             {
                 throw new FormulaFormatException("Ending token must be a: number, variable, or closing Parenthese");
             }
@@ -149,7 +148,7 @@ namespace Formulas
                     }
                     else if (operatorStack.Count() != 0 && operatorStack.Peek() == "/")
                     {
-                        if (valueStack.Peek() != 0)
+                        if (result != 0)
                         {
                             operatorStack.Pop();
                             valueStack.Push(valueStack.Pop() / result);
@@ -216,10 +215,11 @@ namespace Formulas
                         }
                         else
                         {
+                            double topNum = valueStack.Pop();
                             if (valueStack.Peek() != 0)
                             {
                                 operatorStack.Pop();
-                                valueStack.Push((valueStack.Pop()/valueStack.Pop()));
+                                valueStack.Push((topNum/valueStack.Pop()));
                             }
                             else
                             {
@@ -238,7 +238,7 @@ namespace Formulas
                         }
                         else if (operatorStack.Count() != 0 && operatorStack.Peek() == "/")
                         {
-                            if (valueStack.Peek() != 0)
+                            if (lookup(s) != 0)
                             {
                                 operatorStack.Pop();
                                 valueStack.Push(valueStack.Pop() / lookup(s) );
