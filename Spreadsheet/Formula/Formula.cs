@@ -19,7 +19,7 @@ namespace Formulas
     /// </summary>
     public class Formula
     {
-        string [] formulaArray = new string [0];
+        List<string> formulaArray = new List<string>();
         /// Creates a Formula from a string that consists of a standard infix expression composed
         /// from non-negative floating-point numbers (using C#-like syntax for double/int literals), 
         /// variable symbols (a letter followed by zero or more letters and/or digits), left and right
@@ -47,15 +47,11 @@ namespace Formulas
             int leftParen = 0;
             int rightParen = 0;
             double test;
-            int whiteCount = (formula.Count(x => x == ' '));
             int j = 0;
-
-            formulaArray = new string[formula.Length - whiteCount];
             
             foreach(string s in GetTokens(formula))
             {
-                formulaArray[j] = s;
-                j++;
+                formulaArray.Add(s);
             }
 
             if(formula.Length == 0)
@@ -78,12 +74,12 @@ namespace Formulas
                 throw new FormulaFormatException("The number of open and close parenthesis do not match");
             }
 
-
-            for(int i = 0; i < formulaArray.Length; i++)
+            for(int i = 0; i < formulaArray.Count() -1; i++)
             {
+                
                 if(formulaArray[i] == "(" || formulaArray[i] == "+" || formulaArray[i] == "*" || formulaArray[i] == "-" || formulaArray[i] == "/")
                 {
-                    if (i +1 < formulaArray.Count() && formulaArray[i + 1] != null && (char.IsLetterOrDigit(formulaArray[i + 1].ToCharArray()[0]) || formulaArray[i + 1] == "("))
+                    if (char.IsLetterOrDigit(formulaArray[i + 1][0]) || formulaArray[i + 1] == "(")
                     {
                         if (formulaArray[i] == "(")
                         {
@@ -96,9 +92,9 @@ namespace Formulas
                     }
                 }
                 
-                if (i + 1 < (formulaArray.Length) && formulaArray[i + 1] != null && (char.IsLetterOrDigit(formulaArray[i].ToCharArray()[0]) || formulaArray[i] == ")"))
+                if ((char.IsLetterOrDigit(formulaArray[i][0]) || formulaArray[i] == ")"))
                 {
-                    if (char.IsLetter(formulaArray[i].ToCharArray()[0]) && formulaArray[i + 1] != null && double.TryParse(formulaArray[i + 1].ToString(), out test))
+                    if (char.IsLetter(formulaArray[i][0]) && double.TryParse(formulaArray[i + 1].ToString(), out test))
                     {
 
                     }
@@ -120,10 +116,6 @@ namespace Formulas
                     throw new FormulaFormatException("There are more closing parentheses than open parenthese at this point");
                 }
             }
-
-
-   
-
         }
         /// <summary>
         /// Evaluates this Formula, using the Lookup delegate to determine the values of variables.  (The
