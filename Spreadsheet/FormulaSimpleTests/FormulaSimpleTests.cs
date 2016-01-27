@@ -140,10 +140,26 @@ namespace FormulaTestCases
 
         [TestMethod]
         [ExpectedException(typeof(FormulaEvaluationException))]
-        public void Evalute7()
+        public void Evaluate7()
         {
             Formula f = new Formula("5/0 + 1 -9");
             Assert.AreEqual(f.Evaluate(Lookup4), 0, 1e-6);
+        }
+
+        [TestMethod]
+        public void Evaluate8()
+        {
+            Formula f = new Formula("1.0e9");
+            Assert.AreEqual(f.Evaluate(Lookup4), 1000000000, 1e-6);
+        }
+
+
+        [TestMethod]
+        [ExpectedException(typeof(FormulaEvaluationException))]
+        public void Evaluate9()
+        {
+            Formula f = new Formula("1.0 * e9");
+            Assert.AreEqual(f.Evaluate(Lookup4), 1000000000, 1e-6);
         }
 
         /// <summary>
