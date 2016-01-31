@@ -86,7 +86,7 @@ namespace Formulas
                 
                 if(formulaArray[i] == "(" || formulaArray[i] == "+" || formulaArray[i] == "*" || formulaArray[i] == "-" || formulaArray[i] == "/")
                 {
-                    if (!char.IsLetterOrDigit(formulaArray[i + 1][0]) &&  formulaArray[i + 1] != "(")
+                    if (!(char.IsLetter(formulaArray[i + 1][0]) ||  double.TryParse(formulaArray[i+1].ToString(), out test)) &&  formulaArray[i + 1] != "(")
                     {
                         throw new FormulaFormatException("The only thing that can follow a parenthese or operator is a number, variable, or opening parenthese");
                     }
@@ -176,7 +176,8 @@ namespace Formulas
                         if (operatorStack.Count() != 0 && operatorStack.Peek() == "-")
                         {
                             operatorStack.Pop();
-                            valueStack.Push(valueStack.Pop() - valueStack.Pop());
+                            result = valueStack.Pop();
+                            valueStack.Push(valueStack.Pop() - result);
                         }
 
                     }
@@ -190,7 +191,7 @@ namespace Formulas
 
                 else if (s == ")")
                 {
-                    if (operatorStack.Count() != 0 && (operatorStack.Peek() == "+" || s == "-"))
+                    if (operatorStack.Count() != 0 && (operatorStack.Peek() == "+" || operatorStack.Peek() == "-"))
                     {
                         if (operatorStack.Peek() == "+")
                         {
@@ -200,7 +201,8 @@ namespace Formulas
                         else
                         {
                             operatorStack.Pop();
-                            valueStack.Push(valueStack.Pop() - valueStack.Pop());
+                            result = valueStack.Pop();
+                            valueStack.Push(valueStack.Pop() - result);
                         }
                     }
 
@@ -216,10 +218,10 @@ namespace Formulas
                         else
                         {
                             double topNum = valueStack.Pop();
-                            if (valueStack.Peek() != 0)
+                            if (topNum != 0)
                             {
                                 operatorStack.Pop();
-                                valueStack.Push((topNum/valueStack.Pop()));
+                                valueStack.Push((valueStack.Pop())/topNum);
                             }
                             else
                             {
@@ -268,7 +270,8 @@ namespace Formulas
                 }   
                 else if(operatorStack.Peek() == "-")
                 {
-                    return valueStack.Pop() - valueStack.Pop();
+                    result = valueStack.Pop();
+                    return valueStack.Pop() - result;
                 } 
             }
 
