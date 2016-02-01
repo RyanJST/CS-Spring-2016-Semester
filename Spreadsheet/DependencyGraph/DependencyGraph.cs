@@ -148,7 +148,13 @@ namespace Dependencies
 
             if (HasDependees(s))
             {
-
+                foreach(KeyValuePair<string, List<string>> pair in Graph)
+                {
+                    if (pair.Value.Contains(s))
+                    {
+                        yield return pair.Key;
+                    }
+                }
             }
         
         }
