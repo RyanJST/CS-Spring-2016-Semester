@@ -49,11 +49,14 @@ namespace Dependencies
     /// </summary>
     public class DependencyGraph
     {
+
+        Dictionary<string, List<string>> Graph = null;
         /// <summary>
         /// Creates a DependencyGraph containing no dependencies.
         /// </summary>
         public DependencyGraph()
         {
+            Graph = new Dictionary<string, List<string>>();
         }
 
         /// <summary>
@@ -61,7 +64,19 @@ namespace Dependencies
         /// </summary>
         public int Size
         {
-            get { return 0; }
+            
+            get
+            {
+                int size = 0;
+                foreach (KeyValuePair<string, List<string>> i in Graph)
+                {
+                    foreach(string item in i.Value)
+                    {
+                        size++;
+                    }
+                }
+                return size;
+            }
         }
 
         /// <summary>
@@ -69,6 +84,15 @@ namespace Dependencies
         /// </summary>
         public bool HasDependents(string s)
         {
+            if (s == null)
+            {
+                throw new ArgumentNullException("s");
+            }
+            if (Graph[s] != null)
+            {  
+                    return true;
+               
+            }
             return false;
         }
 
@@ -77,6 +101,17 @@ namespace Dependencies
         /// </summary>
         public bool HasDependees(string s)
         {
+            if (s == null)
+            {
+                throw new ArgumentNullException("s");
+            }
+            foreach(KeyValuePair<string, List<string>> pair in Graph)
+            {
+                if (pair.Value.Contains(s))
+                {
+                    return true;
+                }
+            }
             return false;
         }
 
@@ -85,15 +120,37 @@ namespace Dependencies
         /// </summary>
         public IEnumerable<string> GetDependents(string s)
         {
-            return null;
-        }
+            if (s == null)
+            {
+                throw new ArgumentNullException("s");
+            }
+
+            if (HasDependents(s))
+            {
+                foreach(string pair in Graph[s])
+                {
+                        yield return pair;
+                    }
+                }
+            }
+        
 
         /// <summary>
         /// Enumerates dependees(s).  Requires s != null.
         /// </summary>
         public IEnumerable<string> GetDependees(string s)
         {
-            return null;
+            
+            if (s == null)
+            {
+                throw new ArgumentNullException("s");
+            }
+
+            if (HasDependees(s))
+            {
+
+            }
+        
         }
 
         /// <summary>
@@ -103,6 +160,22 @@ namespace Dependencies
         /// </summary>
         public void AddDependency(string s, string t)
         {
+            if (s == null)
+            {
+                throw new ArgumentNullException("s");
+            }
+            if (t == null)
+            {
+                throw new ArgumentNullException("t");
+            }
+
+            if (!HasDependents(s))
+            {
+                foreach(KeyValuePair<string, string> )
+            }
+
+
+                Graph.Add(s, t);
         }
 
         /// <summary>
@@ -112,6 +185,14 @@ namespace Dependencies
         /// </summary>
         public void RemoveDependency(string s, string t)
         {
+            if (s == null)
+            {
+                throw new ArgumentNullException("s");
+            }
+            if (t == null)
+            {
+                throw new ArgumentNullException("t");
+            }
         }
 
         /// <summary>
@@ -121,6 +202,11 @@ namespace Dependencies
         /// </summary>
         public void ReplaceDependents(string s, IEnumerable<string> newDependents)
         {
+            if (s == null)
+            {
+                throw new ArgumentNullException("s");
+            }
+           
         }
 
         /// <summary>
@@ -130,6 +216,11 @@ namespace Dependencies
         /// </summary>
         public void ReplaceDependees(string t, IEnumerable<string> newDependees)
         {
+            
+            if (t == null)
+            {
+                throw new ArgumentNullException("t");
+            }
         }
     }
 }
