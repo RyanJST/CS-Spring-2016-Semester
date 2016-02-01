@@ -33,21 +33,38 @@ namespace DependencyGraphTests
 
             Random rand = new Random();
             string[] testKeys = new string[10] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j" };
-            int num = 1;
-            int increaseNum = 10;
-            for (int i = 0; i < 10000; i++)
+            for (int i = 0; i < 1000; i++)
             {
-                increaseNum += num/2;
-                graph.AddDependency(testKeys[rand.Next(0, 10)], rand.Next(0,1000000000).ToString());
-                num = increaseNum;
+                foreach(string parent in testKeys)
+                {
+                    graph.AddDependency(parent, rand.Next(0, 1000).ToString());
+                }
             }
             foreach(string parent in testKeys)
             {
                 Assert.IsTrue(graph.HasDependents(parent));
             }
+        }
 
+        [TestMethod]
+        public void graphTest5()
+        {
+            DependencyGraph graph = new DependencyGraph();
 
+            string[] children = new string[10] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j" };
+            Random rand = new Random();
+            for(int i = 0; i < 1000; i++)
+            {
+                foreach(string child in children)
+                {
+                    graph.AddDependency(i.ToString(), child);
+                }
+            }
 
+            foreach(string child in children)
+            {
+                Assert.IsTrue(graph.HasDependees(child));
+            }
         }
     }
 }
