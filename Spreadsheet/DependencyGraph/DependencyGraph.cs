@@ -88,7 +88,7 @@ namespace Dependencies
             {
                 throw new ArgumentNullException("s");
             }
-            if (Graph[s] != null)
+            if (Graph[s].Count != 0)
             {  
                     return true;
                
