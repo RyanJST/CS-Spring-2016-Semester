@@ -24,7 +24,7 @@ namespace Formulas
         /// A list variable that will hold the formula.  The constructor uses the getTokens() method to add the tokenized formula
         /// to this and the Evalute() method uses this variable to run through the evalution process on the formula.
         /// </summary>
-        List<string> formulaArray = new List<string>();
+        private List<string> formulaArray = new List<string>();
         ///<summary>
         /// Creates a Formula from a string that consists of a standard infix expression composed
         /// from non-negative floating-point numbers (using C#-like syntax for double/int literals), 

@@ -50,7 +50,7 @@ namespace Dependencies
     public class DependencyGraph
     {
 
-        Dictionary<string, List<string>> Graph = null;
+        private Dictionary<string, List<string>> Graph = null;
         /// <summary>
         /// Creates a DependencyGraph containing no dependencies.
         /// </summary>
@@ -70,10 +70,7 @@ namespace Dependencies
                 int size = 0;
                 foreach (KeyValuePair<string, List<string>> i in Graph)
                 {
-                    foreach(string item in i.Value)
-                    {
-                        size++;
-                    }
+                    size += i.Value.Count;
                 }
                 return size;
             }

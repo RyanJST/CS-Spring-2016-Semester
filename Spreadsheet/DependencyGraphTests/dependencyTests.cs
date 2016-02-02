@@ -66,5 +66,51 @@ namespace DependencyGraphTests
                 Assert.IsTrue(graph.HasDependees(child));
             }
         }
+
+        [TestMethod]
+        public void graphTest6()
+        {
+            DependencyGraph graph = new DependencyGraph();
+
+            string[] children = new string[10] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j" };
+            string[] parent = new string[10] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j" };
+            
+            foreach(string parents in parent)
+            {
+                foreach(string child in children)
+                {
+                    graph.AddDependency(parents, child);
+                }
+            }
+
+            graph.RemoveDependency("a", "a");
+
+            foreach(string aChildren in graph.GetDependents("a"))
+            {
+                Assert.AreNotEqual("a", aChildren);
+            }
+        }
+
+        [TestMethod]
+        public void graphTest7()
+        {
+            DependencyGraph graph = new DependencyGraph();
+
+            string[] children = new string[10] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j" };
+            string[] parent = new string[10] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j" };
+
+            foreach (string parents in parent)
+            {
+                foreach (string child in children)
+                {
+                    graph.AddDependency(parents, child);
+                }
+            }
+
+            foreach (string aChildren in graph.GetDependents("a"))
+            {
+                Assert.AreNotEqual("a", aChildren);
+            }
+        }
     }
 }
