@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Dependencies;
+
 namespace DependencyGraphTests
 {
     [TestClass]
@@ -98,6 +99,84 @@ namespace DependencyGraphTests
 
             string[] children = new string[10] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j" };
             string[] parent = new string[10] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j" };
+            string[] testChildren = new string[10];
+            int i = 0;
+            foreach (string parents in parent)
+            {
+                foreach (string child in children)
+                {
+                    graph.AddDependency(parents, child);
+                }
+            }
+
+
+            foreach (string aChildren in graph.GetDependents("a"))
+            {
+                testChildren[i] = aChildren;
+                i++;
+            }
+            for (int j = 0; j < children.Length; j++){
+                Assert.AreEqual(children[j], testChildren[j]);
+            }
+        }
+
+        [TestMethod]
+        public void graphTest8()
+        {
+            DependencyGraph graph = new DependencyGraph();
+
+            string[] children = new string[10] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j" };
+            string[] parent = new string[10] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j" };
+            string[] testChildren = new string[10];
+            int i = 0;
+            foreach (string parents in parent)
+            {
+                foreach (string child in children)
+                {
+                    graph.AddDependency(parents, child);
+                }
+            }
+
+            foreach (string aParents in graph.GetDependees("a"))
+            {
+                testChildren[i] = aParents;
+                i++;
+            }
+            for (int j = 0; j < parent.Length; j++)
+            {
+                Assert.AreEqual(parent[j], testChildren[j]);
+            }
+        }
+
+        [TestMethod]
+        public void graphTest9()
+        {
+            DependencyGraph graph = new DependencyGraph();
+
+            string[] children = new string[10] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j" };
+            string[] parent = new string[10] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j" };
+            foreach (string parents in parent)
+            {
+                foreach (string child in children)
+                {
+                    graph.AddDependency(parents, child);
+                }
+            }
+            Assert.AreEqual(100, graph.Size);
+        }
+
+        [TestMethod]
+        public void graphTest10()
+        {
+            DependencyGraph graph = new DependencyGraph();
+
+            string[] children = new string[10] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j" };
+            string[] newChildren = new string[10] {"k", "l", "m", "n", "o", "p", "q", "r", "s", "t"};
+            string[] parent = new string[10] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j" };
+
+            string[] testChild = new string[10];
+
+            int i = 0;
 
             foreach (string parents in parent)
             {
@@ -107,9 +186,17 @@ namespace DependencyGraphTests
                 }
             }
 
-            foreach (string aChildren in graph.GetDependents("a"))
+            graph.ReplaceDependents("b", newChildren);
+
+            foreach(string child in graph.GetDependents("b"))
             {
-                Assert.AreNotEqual("a", aChildren);
+                testChild[i] = child;
+                i++;
+            }
+
+            for(int j = 0; j < newChildren.Length; j++)
+            {
+                Assert.AreEqual(newChildren[j], testChild[j]);
             }
         }
     }
