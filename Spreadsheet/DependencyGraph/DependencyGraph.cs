@@ -50,13 +50,13 @@ namespace Dependencies
     public class DependencyGraph
     {
 
-        private Dictionary<string, List<string>> Graph = null;
+        private Dictionary<string, HashSet<string>> Graph = null;
         /// <summary>
         /// Creates a DependencyGraph containing no dependencies.
         /// </summary>
         public DependencyGraph()
         {
-            Graph = new Dictionary<string, List<string>>();
+            Graph = new Dictionary<string, HashSet<string>>();
         }
 
         /// <summary>
@@ -68,7 +68,7 @@ namespace Dependencies
             get
             {
                 int size = 0;
-                foreach (KeyValuePair<string, List<string>> i in Graph)
+                foreach (KeyValuePair<string, HashSet<string>> i in Graph)
                 {
                     size += i.Value.Count;
                 }
@@ -105,7 +105,7 @@ namespace Dependencies
             {
                 throw new ArgumentNullException("s");
             }
-            foreach(KeyValuePair<string, List<string>> pair in Graph)
+            foreach(KeyValuePair<string, HashSet<string>> pair in Graph)
             {
                 if (pair.Value.Contains(s))
                 {
@@ -148,7 +148,7 @@ namespace Dependencies
 
             if (HasDependees(s))
             {
-                foreach(KeyValuePair<string, List<string>> pair in Graph)
+                foreach(KeyValuePair<string, HashSet<string>> pair in Graph)
                 {
                     if (pair.Value.Contains(s))
                     {
@@ -177,14 +177,12 @@ namespace Dependencies
 
             if (Graph.ContainsKey(s))
             {
-                if (!Graph[s].Contains(t))
-                {
-                    Graph[s].Add(t);
-                }
+
+                Graph[s].Add(t);
             }
             else
             {
-                Graph.Add(s, new List<string>());
+                Graph.Add(s, new HashSet<string>());
                 Graph[s].Add(t);
             }
 

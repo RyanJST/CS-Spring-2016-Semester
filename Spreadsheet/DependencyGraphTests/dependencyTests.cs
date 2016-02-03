@@ -271,5 +271,24 @@ namespace DependencyGraphTests
 
             Assert.IsFalse(graph.HasDependees("m"));
         }
+
+        [TestMethod]
+        public void graphTest14()
+        {
+            DependencyGraph graph = new DependencyGraph();
+
+            string[] children = new string[10] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j" };
+            string[] newChildren = new string[10] { "a", "a", "a", "a", "a", "a", "a", "a", "a", "a" };
+
+            foreach (string child in children)
+            {
+                foreach (string parent in newChildren)
+                {
+                    graph.AddDependency(parent, child);
+                }
+            }
+
+            Assert.AreEqual(10,graph.Size);
+        }
     }
 }
