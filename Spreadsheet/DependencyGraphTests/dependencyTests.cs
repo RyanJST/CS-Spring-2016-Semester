@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Dependencies;
+using System.Collections.Generic;
 
 namespace DependencyGraphTests
 {
@@ -289,6 +290,90 @@ namespace DependencyGraphTests
             }
 
             Assert.AreEqual(10,graph.Size);
+        }
+
+        [TestMethod]
+        public void graphTest15()
+        {
+            DependencyGraph graph = new DependencyGraph();
+
+            graph.AddDependency("a", "b");
+            graph.AddDependency("a", "c");
+
+            List<string> tempList = new List<string>();
+
+            foreach(string child in graph.GetDependents("a"))
+            {
+                tempList.Add(child);
+            }
+
+            tempList.Add("d");
+
+            Assert.IsTrue(new HashSet<string> { "b", "c", "d" }.SetEquals(tempList));
+            Assert.IsTrue(new HashSet<string> { "b", "c" }.SetEquals(graph.GetDependents("a")));
+        }
+
+        [TestMethod]
+        public void graphTest16()
+        {
+            DependencyGraph graph = new DependencyGraph();
+
+            string[] children = new string[10] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j" };
+            Random rand = new Random();
+            for (int i = 0; i < 10000; i++)
+            {
+                foreach (string child in children)
+                {
+                    graph.AddDependency(i.ToString(), child);
+                }
+            }
+
+            foreach (string child in children)
+            {
+                Assert.IsTrue(graph.HasDependees(child));
+            }
+        }
+
+        [TestMethod]
+        public void graphTest17()
+        {
+            DependencyGraph graph = new DependencyGraph();
+
+            string[] parent = new string[10] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j" };
+            Random rand = new Random();
+            for (int i = 0; i < 10000; i++)
+            {
+                foreach (string newParent in parent)
+                {
+                    graph.AddDependency(newParent, i.ToString());
+                }
+            }
+
+            foreach (string newParent in parent)
+            {
+                Assert.IsTrue(graph.HasDependents(newParent));
+            }
+        }
+
+        [TestMethod]
+        public void graphTest18()
+        {
+            DependencyGraph graph = new DependencyGraph();
+
+            graph.AddDependency("a", "b");
+            graph.AddDependency("c", "b");
+
+            List<string> tempList = new List<string>();
+
+            foreach (string parent in graph.GetDependees("b"))
+            {
+                tempList.Add(parent);
+            }
+
+            tempList.Add("d");
+
+            Assert.IsTrue(new HashSet<string> { "a", "c", "d" }.SetEquals(tempList));
+            Assert.IsTrue(new HashSet<string> { "a", "c" }.SetEquals(graph.GetDependees("b")));
         }
     }
 }
