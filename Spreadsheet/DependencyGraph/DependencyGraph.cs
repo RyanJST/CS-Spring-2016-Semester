@@ -49,7 +49,10 @@ namespace Dependencies
     /// </summary>
     public class DependencyGraph
     {
-
+        /// <summary>
+        /// A dictionary variable that will contain our relationships for the dependency graph.
+        /// Uses a string as the key(dependee) and a hashset to store the values(dependents)
+        /// </summary>
         private Dictionary<string, HashSet<string>> Graph = null;
         /// <summary>
         /// Creates a DependencyGraph containing no dependencies.
@@ -87,7 +90,7 @@ namespace Dependencies
             }
             if (Graph.ContainsKey(s))
             {
-                if (Graph[s].Count != 0)
+                if (Graph[s].Count != 0)//Checks to see if the hashset is empty, if not, returns true
                 {
                     return true;
 
@@ -107,7 +110,7 @@ namespace Dependencies
             }
             foreach(KeyValuePair<string, HashSet<string>> pair in Graph)
             {
-                if (pair.Value.Contains(s))
+                if (pair.Value.Contains(s))//iterates through each hashset, if the hashset contains it, return true
                 {
                     return true;
                 }
@@ -127,9 +130,9 @@ namespace Dependencies
 
             if (HasDependents(s))
             {
-                foreach(string pair in Graph[s])
+                foreach(string value in Graph[s])//yields each dependent to the parent and returns the value
                 {
-                        yield return pair;
+                        yield return value;
                     }
                 }
             }
@@ -148,9 +151,9 @@ namespace Dependencies
 
             if (HasDependees(s))
             {
-                foreach(KeyValuePair<string, HashSet<string>> pair in Graph)
+                foreach(KeyValuePair<string, HashSet<string>> pair in Graph)//iterates through each keyvaluepair
                 {
-                    if (pair.Value.Contains(s))
+                    if (pair.Value.Contains(s))//If the pair contains the dependent in the hashset, returns the key to it
                     {
                         yield return pair.Key;
                     }
@@ -175,12 +178,11 @@ namespace Dependencies
                 throw new ArgumentNullException("t");
             }
 
-            if (Graph.ContainsKey(s))
+            if (Graph.ContainsKey(s))//if the dependee is already in the graph, then adds the dependent to that parent
             {
-
-                Graph[s].Add(t);
+                Graph[s].Add(t);//hashset prevents multiple relationships from being readded
             }
-            else
+            else//If the dependee is not in the graph, then adds the dependee and the dependent to the graph
             {
                 Graph.Add(s, new HashSet<string>());
                 Graph[s].Add(t);
@@ -203,12 +205,10 @@ namespace Dependencies
             {
                 throw new ArgumentNullException("t");
             }
-            if (HasDependents(s))
+
+            if (HasDependents(s))//checks to see if the dependee has any dependents, if not, then it does nothing
             {
-                if (Graph[s].Contains(t))
-                {
-                    Graph[s].Remove(t);
-                }
+                Graph[s].Remove(t);//Removes the dependency if it exists, else. does nothing.
             }
         }
 
@@ -226,12 +226,12 @@ namespace Dependencies
 
             if (HasDependents(s))
             {
-                Graph[s].Clear();
+                Graph[s].Clear();//Removes all dependents in one go
             }
 
             foreach (string Depend in newDependents)
             {
-                AddDependency(s, Depend);
+                AddDependency(s, Depend);  //Adds all the new dependents using the addDependeny method
             }
 
         }
@@ -251,14 +251,12 @@ namespace Dependencies
 
             foreach(string parent in GetDependees(t))
             {
-                RemoveDependency(parent, t);
+                RemoveDependency(parent, t);  //removes all the dependencies that have the value
             }
-
-
 
             foreach(string parent in newDependees)
             {
-                AddDependency(parent, t);
+                AddDependency(parent, t);  //adds the new dependees to the list, having t as their dependents
             }
         }
     }

@@ -375,5 +375,18 @@ namespace DependencyGraphTests
             Assert.IsTrue(new HashSet<string> { "a", "c", "d" }.SetEquals(tempList));
             Assert.IsTrue(new HashSet<string> { "a", "c" }.SetEquals(graph.GetDependees("b")));
         }
+
+        [TestMethod]
+        public void graphTest19()
+        {
+            DependencyGraph graph = new DependencyGraph();
+
+            graph.AddDependency("a", "b");
+            graph.AddDependency("a", "c");
+
+            graph.RemoveDependency("z", "c");
+
+            Assert.AreEqual(2, graph.Size);
+        }
     }
 }
