@@ -5,15 +5,25 @@ using System.Collections.Generic;
 
 namespace DependencyGraphTests
 {
+    /// <summary>
+    /// This is the test class for the DependencyGraph.  Each test method strives to test
+    ///the graph 100% and also run speed tests.  
+    /// </summary>
     [TestClass]
     public class dependencyTests
     {
+        /// <summary>
+        /// Tests a normal construction, nothing else done, no relationships added, just test the constructor
+        /// </summary>
         [TestMethod]
         public void graphTest1()
         {
             DependencyGraph graph = new DependencyGraph();
         }
 
+        /// <summary>
+        /// Checks to see if the null catcher works in hasDependees
+        /// </summary>
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
         public void graphTest2()
@@ -21,6 +31,10 @@ namespace DependencyGraphTests
             DependencyGraph graph = new DependencyGraph();
             graph.HasDependees(null);
         }
+
+        /// <summary>
+        /// Checks to see that size of the graph is zero off the bat
+        /// </summary>
         [TestMethod]
         public void graphTest3()
         {
@@ -28,6 +42,11 @@ namespace DependencyGraphTests
             Assert.AreEqual(graph.Size, 0);
         }
 
+
+        /// <summary>
+        /// First tests adding ten parents that can have up to 100 children.
+        /// Then checks to make sure that each dependee has at least one child
+        /// </summary>
         [TestMethod]
         public void graphTest4()
         {
@@ -48,6 +67,10 @@ namespace DependencyGraphTests
             }
         }
 
+        /// <summary>
+        /// Creates over a thousand parents, and gives each ten children
+        /// then checks on whether each child has a parent or not
+        /// </summary>
         [TestMethod]
         public void graphTest5()
         {
@@ -69,10 +92,17 @@ namespace DependencyGraphTests
             }
         }
 
+        /// <summary>
+        /// creates 100 relationships in the graph, and then removes a random relationship
+        /// Then tests on whether or not the relationship is still in the graph or not
+        /// </summary>
+
         [TestMethod]
         public void graphTest6()
         {
             DependencyGraph graph = new DependencyGraph();
+
+            Random rand = new Random();
 
             string[] children = new string[10] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j" };
             string[] parent = new string[10] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j" };
@@ -85,14 +115,23 @@ namespace DependencyGraphTests
                 }
             }
 
-            graph.RemoveDependency("a", "a");
+            int ranNum1 = rand.Next(0, 10);
 
-            foreach(string aChildren in graph.GetDependents("a"))
+            int ranNum2 = rand.Next(0, 10);
+
+            graph.RemoveDependency(parent[ranNum1], children[ranNum2]);
+
+
+
+            foreach(string aChildren in graph.GetDependents(parent[ranNum1]))
             {
-                Assert.AreNotEqual("a", aChildren);
+                Assert.AreNotEqual(children[ranNum2], aChildren);
             }
         }
 
+        /// <summary>
+        /// creates one hundred relationships, annd sets all of the 
+        /// </summary>
         [TestMethod]
         public void graphTest7()
         {
@@ -110,8 +149,11 @@ namespace DependencyGraphTests
                 }
             }
 
+            Random rand = new Random();
 
-            foreach (string aChildren in graph.GetDependents("a"))
+            int ranNum = rand.Next(0, 10);
+
+            foreach (string aChildren in graph.GetDependents(parent[ranNum]))
             {
                 testChildren[i] = aChildren;
                 i++;
@@ -121,6 +163,11 @@ namespace DependencyGraphTests
             }
         }
 
+        /// <summary>
+        /// creates one hundred relationships and gets the dependees of a random dependent.
+        /// Afterwards, puts all the parents into a test array, and confirms that the two arrays
+        /// (parent and testParent) are the same
+        /// </summary>
         [TestMethod]
         public void graphTest8()
         {
@@ -138,7 +185,11 @@ namespace DependencyGraphTests
                 }
             }
 
-            foreach (string aParents in graph.GetDependees("a"))
+            Random rand = new Random();
+
+            int ranNum = rand.Next(0, 10);
+
+            foreach (string aParents in graph.GetDependees(children[ranNum]))
             {
                 testChildren[i] = aParents;
                 i++;
@@ -149,6 +200,10 @@ namespace DependencyGraphTests
             }
         }
 
+        /// <summary>
+        /// Creates a random amount of relationships(up to 100) and tests the size, to make sure that
+        /// the size is equal to the amount of relationships
+        /// </summary>
         [TestMethod]
         public void graphTest9()
         {
@@ -156,16 +211,26 @@ namespace DependencyGraphTests
 
             string[] children = new string[10] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j" };
             string[] parent = new string[10] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j" };
-            foreach (string parents in parent)
+
+            Random rand = new Random();
+
+            int ranNum1 = rand.Next(0, parent.Length);
+            int ranNum2 = rand.Next(0, children.Length);
+            for(int i = 0; i < ranNum1; i++)
             {
-                foreach (string child in children)
+                for(int j = 0; j < ranNum2; j++)
                 {
-                    graph.AddDependency(parents, child);
+                    graph.AddDependency(parent[i], children[j]);
                 }
             }
-            Assert.AreEqual(100, graph.Size);
+            Assert.AreEqual(ranNum1 * ranNum2, graph.Size);
         }
 
+
+        /// <summary>
+        /// Creates one hundred relationships and replaces the dependents of one of the dependees with
+        /// a new set.  Then tests to make sure that the new dependents are them.
+        /// </summary>
         [TestMethod]
         public void graphTest10()
         {
@@ -179,6 +244,10 @@ namespace DependencyGraphTests
 
             int i = 0;
 
+            Random rand = new Random();
+
+            int ranNum = rand.Next(0, parent.Length);
+
             foreach (string parents in parent)
             {
                 foreach (string child in children)
@@ -187,9 +256,9 @@ namespace DependencyGraphTests
                 }
             }
 
-            graph.ReplaceDependents("b", newChildren);
+            graph.ReplaceDependents(parent[ranNum], newChildren);
 
-            foreach(string child in graph.GetDependents("b"))
+            foreach(string child in graph.GetDependents(parent[ranNum]))
             {
                 testChild[i] = child;
                 i++;
@@ -201,31 +270,42 @@ namespace DependencyGraphTests
             }
         }
 
-
+        /// <summary>
+        /// Adds and removes the same dependency 100,000 times, to test the speed of the execution
+        /// and ensure that it is instantaneous to the end user.
+        /// </summary>
         [TestMethod]
         public void graphTest11()
         {
             DependencyGraph graph = new DependencyGraph();
             
-            for(int i = 0; i< 10000; i++)
+            for(int i = 0; i< 100000; i++)
             {
                 graph.AddDependency("a", "b");
                 graph.RemoveDependency("a", "b");
             }
         }
 
+        /// <summary>
+        /// creates one hundred relationshipsand replaces the dependees of a certain value
+        /// Then tests to ensure that the dependees are the new dependees 
+        /// </summary>
         [TestMethod]
         public void graphTest12()
         {
             DependencyGraph graph = new DependencyGraph();
 
             string[] children = new string[10] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j" };
-            string[] newChildren = new string[10] { "k", "l", "m", "n", "o", "p", "q", "r", "s", "t" };
+            string[] newParents = new string[10] { "k", "l", "m", "n", "o", "p", "q", "r", "s", "t" };
             string[] parent = new string[10] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j" };
 
             string[] testChild = new string[10];
 
             int i = 0;
+
+            Random rand = new Random();
+
+            int ranNum = rand.Next(0, children.Length);
 
             foreach (string parents in parent)
             {
@@ -235,20 +315,23 @@ namespace DependencyGraphTests
                 }
             }
 
-            graph.ReplaceDependees("b", newChildren);
+            graph.ReplaceDependees(children[ranNum], newParents);
 
-            foreach (string newParent in graph.GetDependees("b"))
+            foreach (string newParent in graph.GetDependees(children[ranNum]))
             {
                 testChild[i] = newParent;
                 i++;
             }
 
-            for (int j = 0; j < newChildren.Length; j++)
+            for (int j = 0; j < newParents.Length; j++)
             {
-                Assert.AreEqual(newChildren[j], testChild[j]);
+                Assert.AreEqual(newParents[j], testChild[j]);
             }
         }
 
+        /// <summary>
+        /// Creates one hundred relationships and 
+        /// </summary>
         [TestMethod]
         public void graphTest13()
         {
