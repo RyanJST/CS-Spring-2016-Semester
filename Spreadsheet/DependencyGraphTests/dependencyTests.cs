@@ -330,7 +330,8 @@ namespace DependencyGraphTests
         }
 
         /// <summary>
-        /// Creates one hundred relationships and 
+        /// Creates one hundred relationships and randomly removes the dependencies of a certain 
+        /// dependee and tests to make sure that there are no dependencies that involve that dependee.
         /// </summary>
         [TestMethod]
         public void graphTest13()
@@ -338,24 +339,33 @@ namespace DependencyGraphTests
             DependencyGraph graph = new DependencyGraph();
 
             string[] children = new string[10] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j" };
-            string[] newChildren = new string[10] { "k", "l", "m", "n", "o", "p", "q", "r", "s", "t" };
-            
+            string[] parent = new string[10] { "k", "l", "m", "n", "o", "p", "q", "r", "s", "t" };
+
+            Random rand = new Random();
+
+            int ranNum = rand.Next(0, parent.Length);
+
             foreach(string child in children)
             {
-                foreach(string parent in newChildren)
+                foreach(string newParent in parent)
                 {
-                    graph.AddDependency(parent, child);
+                    graph.AddDependency(newParent, child);
                 }
             }
 
             foreach (string child in children)
             {
-                graph.RemoveDependency("m", child);
+                graph.RemoveDependency(parent[ranNum], child);
             }
 
-            Assert.IsFalse(graph.HasDependees("m"));
+            Assert.IsFalse(graph.HasDependees(parent[ranNum]));
         }
 
+        /// <summary>
+        /// This method attempts to create one hundred relationship, but since it uses the same dependent(a)
+        /// it does not add any beyond the first attempt for each dependee.  Then it tests that there are only
+        /// 10 relationship(one per dependee)
+        /// </summary>
         [TestMethod]
         public void graphTest14()
         {
@@ -375,6 +385,10 @@ namespace DependencyGraphTests
             Assert.AreEqual(10,graph.Size);
         }
 
+        /// <summary>
+        /// Ensures that the return results from the getDependents method is not passing a reference, but the value instead
+        /// to make sure that the base results cannot be altered outside of the class methods.
+        /// </summary>
         [TestMethod]
         public void graphTest15()
         {
@@ -396,6 +410,10 @@ namespace DependencyGraphTests
             Assert.IsTrue(new HashSet<string> { "b", "c" }.SetEquals(graph.GetDependents("a")));
         }
 
+        /// <summary>
+        /// This tests creating over 10,000 dependees, each with 10 dependents, primarily ensuring speed
+        /// It also tests speed of looking up the dependees from the dependents.
+        /// </summary>
         [TestMethod]
         public void graphTest16()
         {
@@ -417,6 +435,10 @@ namespace DependencyGraphTests
             }
         }
 
+        /// <summary>
+        /// Tests creating 10 dependees, each with 10000 dependents, for speed
+        /// and checks to see how fast it would take for finding the dependents of a dependee
+        /// </summary>
         [TestMethod]
         public void graphTest17()
         {
@@ -438,6 +460,10 @@ namespace DependencyGraphTests
             }
         }
 
+        /// <summary>
+        /// Checks to make sure that the getDependees method does not return a reference,
+        /// but instead the value itself.  
+        /// </summary>
         [TestMethod]
         public void graphTest18()
         {
@@ -459,6 +485,10 @@ namespace DependencyGraphTests
             Assert.IsTrue(new HashSet<string> { "a", "c" }.SetEquals(graph.GetDependees("b")));
         }
 
+        /// <summary>
+        /// checks on making sure that remove dependency does not crash when the value inputed
+        /// does not exist in the graph.
+        /// </summary>
         [TestMethod]
         public void graphTest19()
         {
