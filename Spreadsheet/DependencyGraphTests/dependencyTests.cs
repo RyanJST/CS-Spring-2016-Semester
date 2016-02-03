@@ -199,5 +199,77 @@ namespace DependencyGraphTests
                 Assert.AreEqual(newChildren[j], testChild[j]);
             }
         }
+
+
+        [TestMethod]
+        public void graphTest11()
+        {
+            DependencyGraph graph = new DependencyGraph();
+            
+            for(int i = 0; i< 10000; i++)
+            {
+                graph.AddDependency("a", "b");
+                graph.RemoveDependency("a", "b");
+            }
+        }
+
+        [TestMethod]
+        public void graphTest12()
+        {
+            DependencyGraph graph = new DependencyGraph();
+
+            string[] children = new string[10] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j" };
+            string[] newChildren = new string[10] { "k", "l", "m", "n", "o", "p", "q", "r", "s", "t" };
+            string[] parent = new string[10] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j" };
+
+            string[] testChild = new string[10];
+
+            int i = 0;
+
+            foreach (string parents in parent)
+            {
+                foreach (string child in children)
+                {
+                    graph.AddDependency(parents, child);
+                }
+            }
+
+            graph.ReplaceDependees("b", newChildren);
+
+            foreach (string newParent in graph.GetDependees("b"))
+            {
+                testChild[i] = newParent;
+                i++;
+            }
+
+            for (int j = 0; j < newChildren.Length; j++)
+            {
+                Assert.AreEqual(newChildren[j], testChild[j]);
+            }
+        }
+
+        [TestMethod]
+        public void graphTest13()
+        {
+            DependencyGraph graph = new DependencyGraph();
+
+            string[] children = new string[10] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j" };
+            string[] newChildren = new string[10] { "k", "l", "m", "n", "o", "p", "q", "r", "s", "t" };
+            
+            foreach(string child in children)
+            {
+                foreach(string parent in newChildren)
+                {
+                    graph.AddDependency(parent, child);
+                }
+            }
+
+            foreach (string child in children)
+            {
+                graph.RemoveDependency("m", child);
+            }
+
+            Assert.IsFalse(graph.HasDependees("m"));
+        }
     }
 }

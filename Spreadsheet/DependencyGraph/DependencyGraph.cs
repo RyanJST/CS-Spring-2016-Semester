@@ -85,10 +85,13 @@ namespace Dependencies
             {
                 throw new ArgumentNullException("s");
             }
-            if (Graph[s].Count != 0)
-            {  
+            if (Graph.ContainsKey(s))
+            {
+                if (Graph[s].Count != 0)
+                {
                     return true;
-               
+
+                }
             }
             return false;
         }
@@ -202,7 +205,7 @@ namespace Dependencies
             {
                 throw new ArgumentNullException("t");
             }
-            if (Graph.ContainsKey(s))
+            if (HasDependents(s))
             {
                 if (Graph[s].Contains(t))
                 {
@@ -223,18 +226,16 @@ namespace Dependencies
                 throw new ArgumentNullException("s");
             }
 
-            if (Graph.ContainsKey(s))
+            if (HasDependents(s))
             {
-                if (HasDependents(s))
-                {
-                    Graph[s].Clear();
-                    foreach(string Depend in newDependents)
-                    {
-                        AddDependency(s, Depend);
-                    }
-                }
+                Graph[s].Clear();
             }
-           
+
+            foreach (string Depend in newDependents)
+            {
+                AddDependency(s, Depend);
+            }
+
         }
 
         /// <summary>
@@ -250,13 +251,13 @@ namespace Dependencies
                 throw new ArgumentNullException("t");
             }
 
-            foreach(KeyValuePair<string, List<string>> pair in Graph)
+            foreach(string parent in GetDependees(t))
             {
-                if (pair.Value.Contains(t))
-                {
-                    pair.Value.Remove(t);
-                }
+                RemoveDependency(parent, t);
             }
+
+
+
             foreach(string parent in newDependees)
             {
                 AddDependency(parent, t);
