@@ -100,7 +100,7 @@ namespace Formulas
                     }
                 }
                 
-                if ((char.IsLetterOrDigit(formulaArray[i][0]) || formulaArray[i] == ")"))
+                if ((char.IsLetter(formulaArray[i][0]) || double.TryParse(formulaArray[i], out test) || formulaArray[i] == ")"))
                 {
                     if (!(char.IsLetter(formulaArray[i][0]) && double.TryParse(formulaArray[i + 1].ToString(), out test)) && !(formulaArray[i + 1] == ")" || formulaArray[i + 1] == "+" || formulaArray[i + 1] == "*" || formulaArray[i + 1] == "-" || formulaArray[i + 1] == "/"))
                     {

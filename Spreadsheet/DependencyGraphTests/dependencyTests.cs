@@ -501,5 +501,16 @@ namespace DependencyGraphTests
 
             Assert.AreEqual(2, graph.Size);
         }
+
+        /// <summary>
+        /// Tests whether the null catcher works for hasDependents
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void graphTest20()
+        {
+            DependencyGraph graph = new DependencyGraph();
+            graph.HasDependents(null);
+        }
     }
 }
