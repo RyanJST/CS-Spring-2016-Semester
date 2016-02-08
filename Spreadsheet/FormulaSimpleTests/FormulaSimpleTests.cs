@@ -165,6 +165,13 @@ namespace FormulaTestCases
             Assert.AreEqual(f.Evaluate(Lookup4), 1000000000, 1e-6);
         }
 
+
+        [TestMethod]
+        public void Evaluate10()
+        {
+            Formula f = new Formula();
+            Assert.AreEqual(f.Evaluate(Lookup4),0, 1e-6);
+        }
         /// <summary>
         /// A Lookup method that maps x to 4.0, y to 6.0, and z to 8.0.
         /// All other variables result in an UndefinedVariableException.

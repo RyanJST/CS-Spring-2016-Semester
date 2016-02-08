@@ -18,13 +18,15 @@ namespace Formulas
     /// the four binary operator symbols +, -, *, and /.  (The unary operators + and -
     /// are not allowed.)
     /// </summary>
-    public class Formula
+    public struct Formula
     {
         /// <summary>
         /// A list variable that will hold the formula.  The constructor uses the getTokens() method to add the tokenized formula
         /// to this and the Evalute() method uses this variable to run through the evalution process on the formula.
         /// </summary>
-        private List<string> formulaArray = new List<string>();
+        private List<string> formulaArray;
+
+        private HashSet<string> variableSet;
         ///<summary>
         /// Creates a Formula from a string that consists of a standard infix expression composed
         /// from non-negative floating-point numbers (using C#-like syntax for double/int literals), 
@@ -48,10 +50,14 @@ namespace Formulas
         /// <param name="formula">Formula taken in by the constructor to be evaluted.</param>
         /// </summary>
 
-
-
         public Formula(string formula)
+        : this (formula, , true)
+            { }
+
+        public Formula(string formula, Normalizer normalizer, Validator validator)
         {
+            formulaArray = new List<string>();
+            variableSet = new HashSet<string>();
             int leftParen = 0;
             int rightParen = 0;
             double test;
@@ -61,12 +67,12 @@ namespace Formulas
                 throw new FormulaFormatException("No tokens detected"); 
             }
             
-            if(!char.IsLetterOrDigit(formula[0]) && formula[0] != '(') //Checks to see if the first token is a: number, variable, or opening parenthesis.
+            if(!char.IsLetter(formula[0]) && !double.TryParse(formula[0].ToString(),out test) && formula[0] != '(') //Checks to see if the first token is a: number, variable, or opening parenthesis.
             {
                 throw new FormulaFormatException("Starting token must be a: number, variable, or opening Parenthese");
             }
 
-            if (!char.IsLetterOrDigit(formula[formula.Count() -1]) && formula[formula.Count() -1] != ')') // Checks to see if the ending token is a number, variable, or closing parenthesis
+            if (!char.IsLetter(formula[formula.Count() -1]) && !double.TryParse(formula[0].ToString(), out test) && formula[formula.Count() -1] != ')') // Checks to see if the ending token is a number, variable, or closing parenthesis
             {
                 throw new FormulaFormatException("Ending token must be a: number, variable, or closing Parenthese");
             }
@@ -83,20 +89,25 @@ namespace Formulas
 
             for (int i = 0; i < formulaArray.Count() -1; i++)
             {
-                
+                formulaArray[i] = normalizer(formulaArray[i]);
+
+                if (!validator(formulaArray[i]))
+                {
+                    throw new FormulaFormatException("Validator failed");
+                }
                 if(formulaArray[i] == "(" || formulaArray[i] == "+" || formulaArray[i] == "*" || formulaArray[i] == "-" || formulaArray[i] == "/")
                 {
-                    if (!(char.IsLetter(formulaArray[i + 1][0]) ||  double.TryParse(formulaArray[i+1].ToString(), out test)) &&  formulaArray[i + 1] != "(")
-                    {
-                        throw new FormulaFormatException("The only thing that can follow a parenthese or operator is a number, variable, or opening parenthese");
-                    }
-                    else
+                    if (char.IsLetter(formulaArray[i + 1][0]) || double.TryParse(formulaArray[i+1].ToString(), out test) ||  formulaArray[i + 1] != "(")
                     {
                         if (formulaArray[i] == "(")
                         {
                             leftParen++;
                         }
-                        
+                    }
+                    else
+                    {
+                        throw new FormulaFormatException("The only thing that can follow a parenthese or operator is a number, variable, or opening parenthese");
+                                         
                     }
                 }
                 
@@ -116,12 +127,18 @@ namespace Formulas
                     
                 }
 
+                if (char.IsLetter(formulaArray[i][0]))
+                {
+                    variableSet.Add(formulaArray[i]);
+                }
+
                 if(rightParen > leftParen)
                 {
                     throw new FormulaFormatException("There are more closing parentheses than open parenthese at this point");
                 }
             }
         }
+
         /// <summary>
         /// Evaluates this Formula, using the Lookup delegate to determine the values of variables.  (The
         /// delegate takes a variable name as a parameter and returns its value (if it has one) or throws
@@ -136,6 +153,10 @@ namespace Formulas
             Stack<double> valueStack = new Stack<double>();
             Stack<string> operatorStack = new Stack<string>();
             double result;
+            if( formulaArray == null)
+            {
+                return 0.0;
+            }
             foreach(string s in formulaArray)
             {
                 result = 0;
@@ -308,6 +329,13 @@ namespace Formulas
                 }
             }
         }
+
+
+        public IEnumerable<string> GetVariables()
+        {
+            return variableSet;
+        }
+
     }
 
     /// <summary>
@@ -318,6 +346,10 @@ namespace Formulas
     /// don't is up to the implementation of the method.
     /// </summary>
     public delegate double Lookup(string s);
+
+    public delegate string Normalizer(string s);
+
+    public delegate bool Validator(string s);
 
     /// <summary>
     /// Used to report that a Lookup delegate is unable to determine the value
