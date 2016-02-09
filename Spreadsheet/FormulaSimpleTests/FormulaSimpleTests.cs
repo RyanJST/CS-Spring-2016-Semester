@@ -174,6 +174,13 @@ namespace FormulaTestCases
             Assert.AreEqual(f.Evaluate(Lookup4), 1000000000, 1e-6);
         }
 
+        [TestMethod]
+        public void Evaluate8a()
+        {
+            Formula f = new Formula("1.0e9");
+            Formula t = new Formula(f.ToString());
+            Assert.AreEqual(t.Evaluate(Lookup4), 1000000000, 1e-6);
+        }
 
         [TestMethod]
         [ExpectedException(typeof(FormulaEvaluationException))]

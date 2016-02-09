@@ -53,13 +53,21 @@ namespace Dependencies
         /// A dictionary variable that will contain our relationships for the dependency graph.
         /// Uses a string as the key(dependee) and a hashset to store the values(dependents)
         /// </summary>
-        private Dictionary<string, HashSet<string>> Graph = null;
+        private Dictionary<string, HashSet<string>> DependentGraph = null;
+        private Dictionary<string, HashSet<string>> DependeeGraph = null;
         /// <summary>
         /// Creates a DependencyGraph containing no dependencies.
         /// </summary>
         public DependencyGraph()
         {
-            Graph = new Dictionary<string, HashSet<string>>();
+            DependentGraph = new Dictionary<string, HashSet<string>>();
+            DependeeGraph = new Dictionary<string, HashSet<string>>();
+        }
+
+        public DependencyGraph(DependencyGraph baseGraph)
+        {
+            DependentGraph = new Dictionary<string, HashSet<string>>(baseGraph.DependentGraph);
+            DependeeGraph = new Dictionary<string, HashSet<string>>(baseGraph.DependeeGraph);
         }
 
         /// <summary>
@@ -71,7 +79,7 @@ namespace Dependencies
             get
             {
                 int size = 0;
-                foreach (KeyValuePair<string, HashSet<string>> i in Graph)
+                foreach (KeyValuePair<string, HashSet<string>> i in DependentGraph)
                 {
                     size += i.Value.Count;
                 }
@@ -88,9 +96,9 @@ namespace Dependencies
             {
                 throw new ArgumentNullException("s");
             }
-            if (Graph.ContainsKey(s))
+            if (DependentGraph.ContainsKey(s))
             {
-                if (Graph[s].Count != 0)//Checks to see if the hashset is empty, if not, returns true
+                if (DependentGraph[s].Count != 0)//Checks to see if the hashset is empty, if not, returns true
                 {
                     return true;
 
@@ -108,11 +116,12 @@ namespace Dependencies
             {
                 throw new ArgumentNullException("s");
             }
-            foreach(KeyValuePair<string, HashSet<string>> pair in Graph)
+            if (DependeeGraph.ContainsKey(s))
             {
-                if (pair.Value.Contains(s))//iterates through each hashset, if the hashset contains it, return true
+                if (DependeeGraph[s].Count != 0)//Checks to see if the hashset is empty, if not, returns true
                 {
                     return true;
+
                 }
             }
             return false;
@@ -130,12 +139,12 @@ namespace Dependencies
 
             if (HasDependents(s))
             {
-                foreach(string value in Graph[s])//yields each dependent to the parent and returns the value
+                foreach(string value in DependentGraph[s])//yields each dependent to the parent and returns the value
                 {
                         yield return value;
-                    }
                 }
             }
+        }
         
 
         /// <summary>
@@ -151,16 +160,14 @@ namespace Dependencies
 
             if (HasDependees(s))
             {
-                foreach(KeyValuePair<string, HashSet<string>> pair in Graph)//iterates through each keyvaluepair
+                foreach (string value in DependeeGraph[s])//yields each dependent to the parent and returns the value
                 {
-                    if (pair.Value.Contains(s))//If the pair contains the dependent in the hashset, returns the key to it
-                    {
-                        yield return pair.Key;
-                    }
+                    yield return value;
                 }
             }
-        
         }
+        
+        
 
         /// <summary>
         /// Adds the dependency (s,t) to this DependencyGraph.
@@ -169,25 +176,30 @@ namespace Dependencies
         /// </summary>
         public void AddDependency(string s, string t)
         {
-            if (s == null)
+            if (s == null || t == null)
             {
                 throw new ArgumentNullException("s");
             }
-            if (t == null)
-            {
-                throw new ArgumentNullException("t");
-            }
 
-            if (Graph.ContainsKey(s))//if the dependee is already in the graph, then adds the dependent to that parent
+            if (DependentGraph.ContainsKey(s))//if the dependee is already in the graph, then adds the dependent to that parent
             {
-                Graph[s].Add(t);//hashset prevents multiple relationships from being readded
+                DependentGraph[s].Add(t);//hashset prevents multiple relationships from being readded
             }
             else//If the dependee is not in the graph, then adds the dependee and the dependent to the graph
             {
-                Graph.Add(s, new HashSet<string>());
-                Graph[s].Add(t);
+                DependentGraph.Add(s, new HashSet<string>());
+                DependentGraph[s].Add(t);
             }
 
+            if (DependeeGraph.ContainsKey(t))//if the dependee is already in the graph, then adds the dependent to that parent
+            {
+                DependeeGraph[t].Add(s);//hashset prevents multiple relationships from being readded
+            }
+            else//If the dependee is not in the graph, then adds the dependee and the dependent to the graph
+            {
+                DependeeGraph.Add(t, new HashSet<string>());
+                DependeeGraph[t].Add(s);
+            }
         }
 
         /// <summary>
@@ -197,18 +209,14 @@ namespace Dependencies
         /// </summary>
         public void RemoveDependency(string s, string t)
         {
-            if (s == null)
+            if (s == null || t == null)
             {
                 throw new ArgumentNullException("s");
             }
-            if (t == null)
+            if (DependentGraph.ContainsKey(s) && DependeeGraph.ContainsKey(t))
             {
-                throw new ArgumentNullException("t");
-            }
-
-            if (HasDependents(s))//checks to see if the dependee has any dependents, if not, then it does nothing
-            {
-                Graph[s].Remove(t);//Removes the dependency if it exists, else. does nothing.
+                DependentGraph[s].Remove(t);//Removes the dependency if it exists, else. does nothing.
+                DependeeGraph[t].Remove(s);
             }
         }
 
@@ -224,9 +232,11 @@ namespace Dependencies
                 throw new ArgumentNullException("s");
             }
 
-            if (HasDependents(s))
+            HashSet <string> children = new HashSet<string>(GetDependents(s));
+
+            foreach(string child in children)
             {
-                Graph[s].Clear();//Removes all dependents in one go
+                RemoveDependency(s, child);
             }
 
             foreach (string Depend in newDependents)
@@ -249,14 +259,16 @@ namespace Dependencies
                 throw new ArgumentNullException("t");
             }
 
-            foreach(string parent in GetDependees(t))
+            HashSet<string> parent = new HashSet<string>(GetDependees(t));
+
+            foreach (string dependee in parent)
             {
-                RemoveDependency(parent, t);  //removes all the dependencies that have the value
+                RemoveDependency(dependee, t);
             }
 
-            foreach(string parent in newDependees)
+            foreach (string newParent in newDependees)
             {
-                AddDependency(parent, t);  //adds the new dependees to the list, having t as their dependents
+                AddDependency(newParent, t);  //adds the new dependees to the list, having t as their dependents
             }
         }
     }
