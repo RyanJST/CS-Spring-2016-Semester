@@ -51,7 +51,7 @@ namespace Formulas
         /// </summary>
 
         public Formula(string formula)
-        : this (formula, , true)
+        : this (formula, normalizer => normalizer, validator => true)
             { }
 
         public Formula(string formula, Normalizer normalizer, Validator validator)
@@ -60,44 +60,50 @@ namespace Formulas
             variableSet = new HashSet<string>();
             int leftParen = 0;
             int rightParen = 0;
+            int j = 0;
             double test;
-
-            if(formula.Length == 0) //Tests to see if there is anything in the formula string, if not, there is no formula to work on.
-            {
-                throw new FormulaFormatException("No tokens detected"); 
-            }
             
-            if(!char.IsLetter(formula[0]) && !double.TryParse(formula[0].ToString(),out test) && formula[0] != '(') //Checks to see if the first token is a: number, variable, or opening parenthesis.
+            foreach (string s in GetTokens(formula))  //Adds the formula put in, to the FormulaArray variable, using the GetTokens() methood.
+            {
+                formulaArray.Add(s);
+                formulaArray[j] = normalizer(formulaArray[j]);
+
+                if (!validator(formulaArray[j]))
+                {
+                    throw new FormulaFormatException("Validator failed");
+                }
+                j++;
+            }
+
+            if(formulaArray.Count == 0) //Tests to see if there is anything in the formula string, if not, there is no formula to work on.
+            {
+                throw new FormulaFormatException("No tokens detected");
+            }
+
+            
+            if(!char.IsLetter(formulaArray[0][0]) && !double.TryParse(formulaArray[0][0].ToString(),out test) && formulaArray[0][0] != '(') //Checks to see if the first token is a: number, variable, or opening parenthesis.
             {
                 throw new FormulaFormatException("Starting token must be a: number, variable, or opening Parenthese");
             }
 
-            if (!char.IsLetter(formula[formula.Count() -1]) && !double.TryParse(formula[0].ToString(), out test) && formula[formula.Count() -1] != ')') // Checks to see if the ending token is a number, variable, or closing parenthesis
+            if (!char.IsLetter(formulaArray[formulaArray.Count() -1][0]) && !double.TryParse(formulaArray[formulaArray.Count() -1], out test) && formulaArray[formulaArray.Count() -1] != ")") // Checks to see if the ending token is a number, variable, or closing parenthesis
             {
                 throw new FormulaFormatException("Ending token must be a: number, variable, or closing Parenthese");
             }
 
-            if(formula.Count(x => x == '(') != formula.Count(x => x == ')')) //Checks to see the the open and close parenthesis are balanced
+            if(formulaArray.Count(x => x == "(") != formulaArray.Count(x => x == ")")) //Checks to see the the open and close parenthesis are balanced
             {
                 throw new FormulaFormatException("The number of open and close parenthesis do not match");
             }
 
-            foreach (string s in GetTokens(formula))  //Adds the formula put in, to the FormulaArray variable, using the GetTokens() methood.
-            {
-                formulaArray.Add(s);
-            }
+
 
             for (int i = 0; i < formulaArray.Count() -1; i++)
             {
-                formulaArray[i] = normalizer(formulaArray[i]);
 
-                if (!validator(formulaArray[i]))
-                {
-                    throw new FormulaFormatException("Validator failed");
-                }
                 if(formulaArray[i] == "(" || formulaArray[i] == "+" || formulaArray[i] == "*" || formulaArray[i] == "-" || formulaArray[i] == "/")
                 {
-                    if (char.IsLetter(formulaArray[i + 1][0]) || double.TryParse(formulaArray[i+1].ToString(), out test) ||  formulaArray[i + 1] != "(")
+                    if (char.IsLetter(formulaArray[i + 1][0]) || double.TryParse(formulaArray[i+1].ToString(), out test) ||  formulaArray[i + 1] == "(")
                     {
                         if (formulaArray[i] == "(")
                         {

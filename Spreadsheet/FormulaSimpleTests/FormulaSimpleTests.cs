@@ -94,8 +94,18 @@ namespace FormulaTestCases
         [TestMethod]
         public void Evaluate2()
         {
-            Formula f = new Formula("x5");
+            Formula f = new Formula("x5", normalizer1, validator1);
             Assert.AreEqual(f.Evaluate(v => 22.5), 22.5, 1e-6);
+        }
+
+        public string normalizer1(string s)
+        {
+            return s.ToUpper();
+        }
+
+        public bool validator1(string s)
+        {
+            return true;
         }
 
         /// <summary>
@@ -120,6 +130,14 @@ namespace FormulaTestCases
         public void Evaluate4()
         {
             Formula f = new Formula("x + y");
+            Assert.AreEqual(f.Evaluate(Lookup4), 10.0, 1e-6);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(FormulaEvaluationException))]
+        public void Evaluate4a()
+        {
+            Formula f = new Formula("x + y", normalizer1, validator1);
             Assert.AreEqual(f.Evaluate(Lookup4), 10.0, 1e-6);
         }
 
@@ -178,6 +196,8 @@ namespace FormulaTestCases
         /// </summary>
         /// <param name="v"></param>
         /// <returns></returns>
+         
+        
         public double Lookup4(string v)
         {
             switch (v)
