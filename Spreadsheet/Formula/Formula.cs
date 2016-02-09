@@ -336,6 +336,17 @@ namespace Formulas
             return variableSet;
         }
 
+        public override string ToString()
+        {
+            string testString = null;
+
+            foreach(string part in formulaArray)
+            {
+                testString += part + " ";
+            }
+            return testString;
+        }
+
     }
 
     /// <summary>
