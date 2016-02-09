@@ -26,7 +26,6 @@ namespace Formulas
         /// </summary>
         private List<string> formulaArray;
 
-        private HashSet<string> variableSet;
         ///<summary>
         /// Creates a Formula from a string that consists of a standard infix expression composed
         /// from non-negative floating-point numbers (using C#-like syntax for double/int literals), 
@@ -57,7 +56,6 @@ namespace Formulas
         public Formula(string formula, Normalizer normalizer, Validator validator)
         {
             formulaArray = new List<string>();
-            variableSet = new HashSet<string>();
             int leftParen = 0;
             int rightParen = 0;
             int j = 0;
@@ -131,11 +129,6 @@ namespace Formulas
                         }
                     }
                     
-                }
-
-                if (char.IsLetter(formulaArray[i][0]))
-                {
-                    variableSet.Add(formulaArray[i]);
                 }
 
                 if(rightParen > leftParen)
@@ -337,8 +330,17 @@ namespace Formulas
         }
 
 
-        public IEnumerable<string> GetVariables()
+        public ISet<string> GetVariables()
         {
+            ISet<string> variableSet = new HashSet<string>();
+
+            foreach(string test in formulaArray)
+            {
+                if (char.IsLetter(test[0]))
+                {
+                    variableSet.Add(test);
+                }
+            }
             return variableSet;
         }
 

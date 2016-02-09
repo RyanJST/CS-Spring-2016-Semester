@@ -204,6 +204,25 @@ namespace GradingTests
                 Assert.AreEqual(4, t.Size);
             }
 
+            [TestMethod()]
+            public void NonEmptyTest1a()
+            {
+                DependencyGraph t = new DependencyGraph();
+                t.AddDependency("a", "b");
+                t.AddDependency("a", "c");
+                t.AddDependency("c", "b");
+                t.AddDependency("b", "d");
+                DependencyGraph v = new DependencyGraph(t);
+                Assert.AreEqual(4, t.Size);
+                Assert.AreEqual(4, v.Size);
+                List<string> test = new List<string>(t.GetDependents("a"));
+                List<string> test2 = new List<string>(v.GetDependents("a"));
+                for (int i = 0; i < test.Count;  i++)
+                {
+                    Assert.AreEqual(test[i], test2[i]);
+                }
+            }
+
             /// <summary>
             ///Non-empty graph contains something
             ///</summary>

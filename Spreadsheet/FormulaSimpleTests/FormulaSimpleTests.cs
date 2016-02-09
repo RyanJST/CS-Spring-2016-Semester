@@ -6,6 +6,7 @@
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Formulas;
+using System.Collections.Generic;
 
 namespace FormulaTestCases
 {
@@ -160,6 +161,23 @@ namespace FormulaTestCases
         }
 
         [TestMethod]
+
+        public void Evaluate6a()
+        {
+            Formula f = new Formula("(x * x + y) * (z / y) * 1.0");
+            ISet<string> test = f.GetVariables();
+            string[] test2 = new string[3] {"x","y","z"};
+            Assert.AreEqual(f.Evaluate(Lookup4), 29.3333326, 1e-6);
+            int i = 0;
+            foreach(string var in test)
+            {
+                Assert.AreEqual(test2[i], var);
+                i++;
+            }
+        }
+
+
+        [TestMethod]
         [ExpectedException(typeof(FormulaEvaluationException))]
         public void Evaluate7()
         {
@@ -181,6 +199,8 @@ namespace FormulaTestCases
             Formula t = new Formula(f.ToString());
             Assert.AreEqual(t.Evaluate(Lookup4), 1000000000, 1e-6);
         }
+
+
 
         [TestMethod]
         [ExpectedException(typeof(FormulaEvaluationException))]
