@@ -64,6 +64,11 @@ namespace Dependencies
             DependeeGraph = new Dictionary<string, HashSet<string>>();
         }
 
+        /// <summary>
+        /// copies one base DependencyGraph into another DependencyGraph, coping the relationships over to the new one
+        /// They will not affect each other, new graph is not a reference.
+        /// </summary>
+        /// <param name="baseGraph">base graph to copy onto new graph</param>
         public DependencyGraph(DependencyGraph baseGraph)
         {
             DependentGraph = new Dictionary<string, HashSet<string>>(baseGraph.DependentGraph);
@@ -232,7 +237,7 @@ namespace Dependencies
                 throw new ArgumentNullException("s");
             }
 
-            HashSet <string> children = new HashSet<string>(GetDependents(s));
+            List<string> children = new List<string>(GetDependents(s));
 
             foreach(string child in children)
             {
