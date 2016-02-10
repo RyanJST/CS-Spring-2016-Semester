@@ -46,13 +46,44 @@ namespace Formulas
         /// If the formula is syntacticaly invalid, throws a FormulaFormatException with an 
         /// explanatory Message.
         /// 
+        /// This version uses a formula as a constructor only.  The Normalizer and Validator fields are 
+        /// set to leave variables as is, and to automatically validate them.
+        /// 
         /// <param name="formula">Formula taken in by the constructor to be evaluted.</param>
         /// </summary>
 
         public Formula(string formula)
-        : this (formula, normalizer => normalizer, validator => true)
+        : this (formula, s => s, s => true)
             { }
 
+
+        ///<summary>
+        /// Creates a Formula from a string that consists of a standard infix expression composed
+        /// from non-negative floating-point numbers (using C#-like syntax for double/int literals), 
+        /// variable symbols (a letter followed by zero or more letters and/or digits), left and right
+        /// parentheses, and the four binary operator symbols +, -, *, and /.  White space is
+        /// permitted between tokens, but is not required.
+        /// 
+        /// Examples of a valid parameter to this constructor are:
+        ///     "2.5e9 + x5 / 17"
+        ///     "(5 * 2) + 8"
+        ///     "x*y-2+35/9"
+        ///     
+        /// Examples of invalid parameters are:
+        ///     "_"
+        ///     "-5.3"
+        ///     "2 5 + 3"
+        /// 
+        /// If the formula is syntacticaly invalid, throws a FormulaFormatException with an 
+        /// explanatory Message.
+        /// 
+        /// This version uses a formula as a constructor only.  The Normalizer and Validator fields are 
+        /// set to leave variables as is, and to automatically validate them.
+        /// 
+        /// <param name="formula">Formula taken in by the constructor to be evaluted.</param>
+        /// <param name="normalizer">Function that turns variables into a chosen canonical form</param>
+        /// <param name="validator">Function that places additional restrictions on variables, if false, will invalidate the formula</param>
+        /// </summary>
         public Formula(string formula, Normalizer normalizer, Validator validator)
         {
             formulaArray = new List<string>();
@@ -63,14 +94,17 @@ namespace Formulas
             
             foreach (string s in GetTokens(formula))  //Adds the formula put in, to the FormulaArray variable, using the GetTokens() methood.
             {
-                formulaArray.Add(s);
-                formulaArray[j] = normalizer(formulaArray[j]);
-
-                if (!validator(formulaArray[j]))
+                formulaArray.Add(s); //Adds the current string to the formulaArray
+                if (char.IsLetter(formulaArray[j][0]))
                 {
-                    throw new FormulaFormatException("Validator failed");
+                    formulaArray[j] = normalizer(formulaArray[j]);  //Changes the current variable to the normalized form
+                    if (!validator(formulaArray[j]))//Checks to see if the variables fail the normalizer.
+                    {
+                        throw new FormulaFormatException("Validator failed");
+                    }
                 }
-                j++;
+
+                j++;//Increments to allow each part of formula array to be changed to canonical form.
             }
 
             if(formulaArray.Count == 0) //Tests to see if there is anything in the formula string, if not, there is no formula to work on.
@@ -329,7 +363,11 @@ namespace Formulas
             }
         }
 
-
+        /// <summary>
+        /// Returns an ISet of every single distinct normalized variable in the formula.
+        /// Example: formula("X+Y+Y9+X"), returns X,Y,Y9
+        /// </summary>
+        /// <returns> ISet composed of every distinct normalized variable</returns>
         public ISet<string> GetVariables()
         {
             ISet<string> variableSet = new HashSet<string>();
@@ -344,6 +382,11 @@ namespace Formulas
             return variableSet;
         }
 
+        /// <summary>
+        /// returns a string representation of the formula
+        /// Example:  Formula(X+Y+9) would return "X+Y+9"
+        /// </summary>
+        /// <returns>returns a string presentation of the formula</returns>
         public override string ToString()
         {
             string testString = null;
@@ -366,8 +409,20 @@ namespace Formulas
     /// </summary>
     public delegate double Lookup(string s);
 
+    /// <summary>
+    /// A normalizer function is one that can convert a variable to a canonical form.
+    /// Given a variable and based upon the normalizer function, it can change it to the output of the
+    /// normalizer function.  After the variable has been normalized, it will still need to pass the 
+    /// normal function construction rules.  E.G. IF normalizer changes X to ++, then the formula will
+    /// throw a new FormulaFormatExeception.
+    /// </summary>
     public delegate string Normalizer(string s);
 
+    /// <summary>
+    /// A validator function allows the user to impose additional restrictions upon variables after they
+    /// have been normalized.  The Validator must return a true or false.  If the validator function returns false, then the formula construction
+    /// will throw a FormulaFormat Exeception.
+    /// </summary>
     public delegate bool Validator(string s);
 
     /// <summary>

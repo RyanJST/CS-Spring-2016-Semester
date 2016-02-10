@@ -51,10 +51,18 @@ namespace Dependencies
     {
         /// <summary>
         /// A dictionary variable that will contain our relationships for the dependency graph.
-        /// Uses a string as the key(dependee) and a hashset to store the values(dependents)
+        /// Uses a string as the key(dependee) and a hashset to store the values(dependents).
+        /// This Dictionary acts primarily as the parent to children relationship holder
         /// </summary>
         private Dictionary<string, HashSet<string>> DependentGraph = null;
+
+        /// <summary>
+        /// A dictionary variable that will contain our relationshps for the dependency graph.
+        /// Uses a sring as the key(dependent) and a hashset to store the values(dependees).
+        /// This Dictionary acts primarily as the child to parents relationship holder.
+        /// </summary>
         private Dictionary<string, HashSet<string>> DependeeGraph = null;
+
         /// <summary>
         /// Creates a DependencyGraph containing no dependencies.
         /// </summary>
@@ -66,7 +74,7 @@ namespace Dependencies
 
         /// <summary>
         /// copies one base DependencyGraph into another DependencyGraph, coping the relationships over to the new one
-        /// They will not affect each other, new graph is not a reference.
+        /// They will not affect each other, new graph is not a reference.  Requires a base graph to copy over
         /// </summary>
         /// <param name="baseGraph">base graph to copy onto new graph</param>
         public DependencyGraph(DependencyGraph baseGraph)
@@ -94,6 +102,7 @@ namespace Dependencies
 
         /// <summary>
         /// Reports whether dependents(s) is non-empty.  Requires s != null.
+        /// If s == null, then throws an ArgumentNullException
         /// </summary>
         public bool HasDependents(string s)
         {
@@ -103,17 +112,14 @@ namespace Dependencies
             }
             if (DependentGraph.ContainsKey(s))
             {
-                if (DependentGraph[s].Count != 0)//Checks to see if the hashset is empty, if not, returns true
-                {
                     return true;
-
-                }
             }
             return false;
         }
 
         /// <summary>
         /// Reports whether dependees(s) is non-empty.  Requires s != null.
+        /// If s == null, then throws an ArgumentNullException
         /// </summary>
         public bool HasDependees(string s)
         {
@@ -123,17 +129,14 @@ namespace Dependencies
             }
             if (DependeeGraph.ContainsKey(s))
             {
-                if (DependeeGraph[s].Count != 0)//Checks to see if the hashset is empty, if not, returns true
-                {
                     return true;
-
-                }
             }
             return false;
         }
 
         /// <summary>
         /// Enumerates dependents(s).  Requires s != null.
+        /// If s == null, then throws an ArgumentNullException
         /// </summary>
         public IEnumerable<string> GetDependents(string s)
         {
@@ -150,10 +153,11 @@ namespace Dependencies
                 }
             }
         }
-        
+
 
         /// <summary>
         /// Enumerates dependees(s).  Requires s != null.
+        /// If s == null, then throws an ArgumentNullException
         /// </summary>
         public IEnumerable<string> GetDependees(string s)
         {
@@ -171,13 +175,14 @@ namespace Dependencies
                 }
             }
         }
-        
-        
+
+
 
         /// <summary>
         /// Adds the dependency (s,t) to this DependencyGraph.
         /// This has no effect if (s,t) already belongs to this DependencyGraph.
         /// Requires s != null and t != null.
+        /// If s || t == null, then throws an ArgumentNullException
         /// </summary>
         public void AddDependency(string s, string t)
         {
@@ -211,6 +216,7 @@ namespace Dependencies
         /// Removes the dependency (s,t) from this DependencyGraph.
         /// Does nothing if (s,t) doesn't belong to this DependencyGraph.
         /// Requires s != null and t != null.
+        /// If s || t == null, then throws an ArgumentNullException
         /// </summary>
         public void RemoveDependency(string s, string t)
         {
@@ -222,13 +228,25 @@ namespace Dependencies
             {
                 DependentGraph[s].Remove(t);//Removes the dependency if it exists, else. does nothing.
                 DependeeGraph[t].Remove(s);
+                if (DependentGraph[s].Count == 0)
+                {
+                    DependentGraph.Remove(s);
+                }
+
+                if (DependeeGraph[t].Count == 0)
+                {
+                    DependeeGraph.Remove(t);
+                }
             }
+
+            
         }
 
         /// <summary>
         /// Removes all existing dependencies of the form (s,r).  Then, for each
         /// t in newDependents, adds the dependency (s,t).
         /// Requires s != null and t != null.
+        /// If s || t == null, then throws an ArgumentNullException
         /// </summary>
         public void ReplaceDependents(string s, IEnumerable<string> newDependents)
         {
@@ -255,6 +273,7 @@ namespace Dependencies
         /// Removes all existing dependencies of the form (r,t).  Then, for each 
         /// s in newDependees, adds the dependency (s,t).
         /// Requires s != null and t != null.
+        /// If s || t == null, then throws an ArgumentNullException
         /// </summary>
         public void ReplaceDependees(string t, IEnumerable<string> newDependees)
         {
