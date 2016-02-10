@@ -91,7 +91,7 @@ namespace Formulas
             int rightParen = 0;
             int j = 0;
             double test;
-            
+
             foreach (string s in GetTokens(formula))  //Adds the formula put in, to the FormulaArray variable, using the GetTokens() methood.
             {
                 formulaArray.Add(s); //Adds the current string to the formulaArray
@@ -186,11 +186,12 @@ namespace Formulas
             Stack<double> valueStack = new Stack<double>();
             Stack<string> operatorStack = new Stack<string>();
             double result;
-            if( formulaArray == null)
+            if (formulaArray == null)
             {
-                return 0.0;
+                formulaArray = new List<string>();
+                formulaArray.Add("0");
             }
-            foreach(string s in formulaArray)
+            foreach (string s in formulaArray)
             {
                 result = 0;
                 if (double.TryParse(s, out result))
@@ -352,7 +353,7 @@ namespace Formulas
             // Overall pattern
             string pattern = string.Format("({0}) | ({1}) | ({2}) | ({3}) | ({4}) | ({5})",
                                             lpPattern, rpPattern, opPattern, varPattern, doublePattern, spacePattern);
-
+      
             // Enumerate matching tokens that don't consist solely of white space.
             foreach (string s in Regex.Split(formula, pattern, RegexOptions.IgnorePatternWhitespace))
             {
@@ -361,6 +362,7 @@ namespace Formulas
                     yield return s;
                 }
             }
+
         }
 
         /// <summary>
@@ -371,8 +373,12 @@ namespace Formulas
         public ISet<string> GetVariables()
         {
             ISet<string> variableSet = new HashSet<string>();
-
-            foreach(string test in formulaArray)
+            if (formulaArray == null)
+            {
+                formulaArray = new List<string>();
+                formulaArray.Add("0");
+            }
+            foreach (string test in formulaArray)
             {
                 if (char.IsLetter(test[0]))
                 {
@@ -390,8 +396,12 @@ namespace Formulas
         public override string ToString()
         {
             string testString = null;
-
-            foreach(string part in formulaArray)
+            if (formulaArray == null)
+            {
+                formulaArray = new List<string>();
+                formulaArray.Add("0");
+            }
+            foreach (string part in formulaArray)
             {
                 testString += part + " ";
             }
