@@ -217,14 +217,31 @@ namespace FormulaTestCases
             Formula f = new Formula();
             Assert.AreEqual(f.Evaluate(Lookup4),0, 1e-6);
         }
+
+        [TestMethod]
+        public void Evaluate11()
+        {
+            Formula f = new Formula();
+            double test;
+            Assert.IsTrue(double.TryParse(f.ToString(), out test));
+            Assert.AreEqual(0.0,test);
+        }
+
+        [TestMethod]
+        public void Evaluate12()
+        {
+            Formula f = new Formula();
+            HashSet<string> test = new HashSet<string>(f.GetVariables());
+            Assert.AreEqual(0, test.Count);
+        }
         /// <summary>
         /// A Lookup method that maps x to 4.0, y to 6.0, and z to 8.0.
         /// All other variables result in an UndefinedVariableException.
         /// </summary>
         /// <param name="v"></param>
         /// <returns></returns>
-         
-        
+
+
         public double Lookup4(string v)
         {
             switch (v)
