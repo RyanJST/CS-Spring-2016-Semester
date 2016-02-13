@@ -18,13 +18,14 @@ namespace Formulas
     /// the four binary operator symbols +, -, *, and /.  (The unary operators + and -
     /// are not allowed.)
     /// </summary>
-    public class Formula
+    public struct Formula
     {
         /// <summary>
         /// A list variable that will hold the formula.  The constructor uses the getTokens() method to add the tokenized formula
         /// to this and the Evalute() method uses this variable to run through the evalution process on the formula.
         /// </summary>
-        List<string> formulaArray = new List<string>();
+        private List<string> formulaArray;
+
         ///<summary>
         /// Creates a Formula from a string that consists of a standard infix expression composed
         /// from non-negative floating-point numbers (using C#-like syntax for double/int literals), 
@@ -45,62 +46,110 @@ namespace Formulas
         /// If the formula is syntacticaly invalid, throws a FormulaFormatException with an 
         /// explanatory Message.
         /// 
+        /// This version uses a formula as a constructor only.  The Normalizer and Validator fields are 
+        /// set to leave variables as is, and to automatically validate them.
+        /// 
         /// <param name="formula">Formula taken in by the constructor to be evaluted.</param>
         /// </summary>
 
-
-
         public Formula(string formula)
+        : this (formula, s => s, s => true)
+            { }
+
+
+        ///<summary>
+        /// Creates a Formula from a string that consists of a standard infix expression composed
+        /// from non-negative floating-point numbers (using C#-like syntax for double/int literals), 
+        /// variable symbols (a letter followed by zero or more letters and/or digits), left and right
+        /// parentheses, and the four binary operator symbols +, -, *, and /.  White space is
+        /// permitted between tokens, but is not required.
+        /// 
+        /// Examples of a valid parameter to this constructor are:
+        ///     "2.5e9 + x5 / 17"
+        ///     "(5 * 2) + 8"
+        ///     "x*y-2+35/9"
+        ///     
+        /// Examples of invalid parameters are:
+        ///     "_"
+        ///     "-5.3"
+        ///     "2 5 + 3"
+        /// 
+        /// If the formula is syntacticaly invalid, throws a FormulaFormatException with an 
+        /// explanatory Message.
+        /// 
+        /// This version uses a formula as a constructor only.  The Normalizer and Validator fields are 
+        /// set to leave variables as is, and to automatically validate them.
+        /// 
+        /// <param name="formula">Formula taken in by the constructor to be evaluted.</param>
+        /// <param name="normalizer">Function that turns variables into a chosen canonical form</param>
+        /// <param name="validator">Function that places additional restrictions on variables, if false, will invalidate the formula</param>
+        /// </summary>
+        public Formula(string formula, Normalizer normalizer, Validator validator)
         {
+            formulaArray = new List<string>();
             int leftParen = 0;
             int rightParen = 0;
+            int j = 0;
             double test;
 
-            if(formula.Length == 0) //Tests to see if there is anything in the formula string, if not, there is no formula to work on.
+            foreach (string s in GetTokens(formula))  //Adds the formula put in, to the FormulaArray variable, using the GetTokens() methood.
             {
-                throw new FormulaFormatException("No tokens detected"); 
+                formulaArray.Add(s); //Adds the current string to the formulaArray
+                if (char.IsLetter(formulaArray[j][0]))
+                {
+                    formulaArray[j] = normalizer(formulaArray[j]);  //Changes the current variable to the normalized form
+                    if (!validator(formulaArray[j]))//Checks to see if the variables fail the normalizer.
+                    {
+                        throw new FormulaFormatException("Validator failed");
+                    }
+                }
+
+                j++;//Increments to allow each part of formula array to be changed to canonical form.
             }
+
+            if(formulaArray.Count == 0) //Tests to see if there is anything in the formula string, if not, there is no formula to work on.
+            {
+                throw new FormulaFormatException("No tokens detected");
+            }
+
             
-            if(!char.IsLetterOrDigit(formula[0]) && formula[0] != '(') //Checks to see if the first token is a: number, variable, or opening parenthesis.
+            if(!char.IsLetter(formulaArray[0][0]) && !double.TryParse(formulaArray[0][0].ToString(),out test) && formulaArray[0][0] != '(') //Checks to see if the first token is a: number, variable, or opening parenthesis.
             {
                 throw new FormulaFormatException("Starting token must be a: number, variable, or opening Parenthese");
             }
 
-            if (!char.IsLetterOrDigit(formula[formula.Count() -1]) && formula[formula.Count() -1] != ')') // Checks to see if the ending token is a number, variable, or closing parenthesis
+            if (!char.IsLetter(formulaArray[formulaArray.Count() -1][0]) && !double.TryParse(formulaArray[formulaArray.Count() -1], out test) && formulaArray[formulaArray.Count() -1] != ")") // Checks to see if the ending token is a number, variable, or closing parenthesis
             {
                 throw new FormulaFormatException("Ending token must be a: number, variable, or closing Parenthese");
             }
 
-            if(formula.Count(x => x == '(') != formula.Count(x => x == ')')) //Checks to see the the open and close parenthesis are balanced
+            if(formulaArray.Count(x => x == "(") != formulaArray.Count(x => x == ")")) //Checks to see the the open and close parenthesis are balanced
             {
                 throw new FormulaFormatException("The number of open and close parenthesis do not match");
             }
 
-            foreach (string s in GetTokens(formula))  //Adds the formula put in, to the FormulaArray variable, using the GetTokens() methood.
-            {
-                formulaArray.Add(s);
-            }
+
 
             for (int i = 0; i < formulaArray.Count() -1; i++)
             {
-                
+
                 if(formulaArray[i] == "(" || formulaArray[i] == "+" || formulaArray[i] == "*" || formulaArray[i] == "-" || formulaArray[i] == "/")
                 {
-                    if (!char.IsLetterOrDigit(formulaArray[i + 1][0]) &&  formulaArray[i + 1] != "(")
-                    {
-                        throw new FormulaFormatException("The only thing that can follow a parenthese or operator is a number, variable, or opening parenthese");
-                    }
-                    else
+                    if (char.IsLetter(formulaArray[i + 1][0]) || double.TryParse(formulaArray[i+1].ToString(), out test) ||  formulaArray[i + 1] == "(")
                     {
                         if (formulaArray[i] == "(")
                         {
                             leftParen++;
                         }
-                        
+                    }
+                    else
+                    {
+                        throw new FormulaFormatException("The only thing that can follow a parenthese or operator is a number, variable, or opening parenthese");
+                                         
                     }
                 }
                 
-                if ((char.IsLetterOrDigit(formulaArray[i][0]) || formulaArray[i] == ")"))
+                if ((char.IsLetter(formulaArray[i][0]) || double.TryParse(formulaArray[i], out test) || formulaArray[i] == ")"))
                 {
                     if (!(char.IsLetter(formulaArray[i][0]) && double.TryParse(formulaArray[i + 1].ToString(), out test)) && !(formulaArray[i + 1] == ")" || formulaArray[i + 1] == "+" || formulaArray[i + 1] == "*" || formulaArray[i + 1] == "-" || formulaArray[i + 1] == "/"))
                     {
@@ -117,11 +166,12 @@ namespace Formulas
                 }
 
                 if(rightParen > leftParen)
-                {
+        {
                     throw new FormulaFormatException("There are more closing parentheses than open parenthese at this point");
                 }
             }
         }
+
         /// <summary>
         /// Evaluates this Formula, using the Lookup delegate to determine the values of variables.  (The
         /// delegate takes a variable name as a parameter and returns its value (if it has one) or throws
@@ -136,7 +186,12 @@ namespace Formulas
             Stack<double> valueStack = new Stack<double>();
             Stack<string> operatorStack = new Stack<string>();
             double result;
-            foreach(string s in formulaArray)
+            if (formulaArray == null)
+            {
+                formulaArray = new List<string>();
+                formulaArray.Add("0");
+            }
+            foreach (string s in formulaArray)
             {
                 result = 0;
                 if (double.TryParse(s, out result))
@@ -176,7 +231,8 @@ namespace Formulas
                         if (operatorStack.Count() != 0 && operatorStack.Peek() == "-")
                         {
                             operatorStack.Pop();
-                            valueStack.Push(valueStack.Pop() - valueStack.Pop());
+                            result = valueStack.Pop();
+                            valueStack.Push(valueStack.Pop() - result);
                         }
 
                     }
@@ -190,7 +246,7 @@ namespace Formulas
 
                 else if (s == ")")
                 {
-                    if (operatorStack.Count() != 0 && (operatorStack.Peek() == "+" || s == "-"))
+                    if (operatorStack.Count() != 0 && (operatorStack.Peek() == "+" || operatorStack.Peek() == "-"))
                     {
                         if (operatorStack.Peek() == "+")
                         {
@@ -200,7 +256,8 @@ namespace Formulas
                         else
                         {
                             operatorStack.Pop();
-                            valueStack.Push(valueStack.Pop() - valueStack.Pop());
+                            result = valueStack.Pop();
+                            valueStack.Push(valueStack.Pop() - result);
                         }
                     }
 
@@ -216,10 +273,10 @@ namespace Formulas
                         else
                         {
                             double topNum = valueStack.Pop();
-                            if (valueStack.Peek() != 0)
+                            if (topNum != 0)
                             {
                                 operatorStack.Pop();
-                                valueStack.Push((topNum/valueStack.Pop()));
+                                valueStack.Push((valueStack.Pop())/topNum);
                             }
                             else
                             {
@@ -268,7 +325,8 @@ namespace Formulas
                 }   
                 else if(operatorStack.Peek() == "-")
                 {
-                    return valueStack.Pop() - valueStack.Pop();
+                    result = valueStack.Pop();
+                    return valueStack.Pop() - result;
                 } 
             }
 
@@ -304,7 +362,52 @@ namespace Formulas
                     yield return s;
                 }
             }
+
         }
+
+        /// <summary>
+        /// Returns an ISet of every single distinct normalized variable in the formula.
+        /// Example: formula("X+Y+Y9+X"), returns X,Y,Y9
+        /// </summary>
+        /// <returns> ISet composed of every distinct normalized variable</returns>
+        public ISet<string> GetVariables()
+        {
+            ISet<string> variableSet = new HashSet<string>();
+            if (formulaArray == null)
+            {
+                formulaArray = new List<string>();
+                formulaArray.Add("0");
+            }
+            foreach (string test in formulaArray)
+            {
+                if (char.IsLetter(test[0]))
+                {
+                    variableSet.Add(test);
+                }
+            }
+            return variableSet;
+        }
+
+        /// <summary>
+        /// returns a string representation of the formula
+        /// Example:  Formula(X+Y+9) would return "X+Y+9"
+        /// </summary>
+        /// <returns>returns a string presentation of the formula</returns>
+        public override string ToString()
+        {
+            string testString = null;
+            if (formulaArray == null)
+            {
+                formulaArray = new List<string>();
+                formulaArray.Add("0");
+            }
+            foreach (string part in formulaArray)
+            {
+                testString += part + " ";
+            }
+            return testString;
+        }
+
     }
 
     /// <summary>
@@ -315,6 +418,22 @@ namespace Formulas
     /// don't is up to the implementation of the method.
     /// </summary>
     public delegate double Lookup(string s);
+
+    /// <summary>
+    /// A normalizer function is one that can convert a variable to a canonical form.
+    /// Given a variable and based upon the normalizer function, it can change it to the output of the
+    /// normalizer function.  After the variable has been normalized, it will still need to pass the 
+    /// normal function construction rules.  E.G. IF normalizer changes X to ++, then the formula will
+    /// throw a new FormulaFormatExeception.
+    /// </summary>
+    public delegate string Normalizer(string s);
+
+    /// <summary>
+    /// A validator function allows the user to impose additional restrictions upon variables after they
+    /// have been normalized.  The Validator must return a true or false.  If the validator function returns false, then the formula construction
+    /// will throw a FormulaFormat Exeception.
+    /// </summary>
+    public delegate bool Validator(string s);
 
     /// <summary>
     /// Used to report that a Lookup delegate is unable to determine the value

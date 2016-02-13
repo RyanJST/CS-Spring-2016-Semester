@@ -6,6 +6,7 @@
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Formulas;
+using System.Collections.Generic;
 
 namespace FormulaTestCases
 {
@@ -65,6 +66,13 @@ namespace FormulaTestCases
             Formula f = new Formula("-5");
         }
 
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void Construct5()
+        {
+            Formula f = new Formula("-5");
+        }
+
 
         [TestMethod]
         [ExpectedException(typeof(FormulaFormatException))]
@@ -94,8 +102,18 @@ namespace FormulaTestCases
         [TestMethod]
         public void Evaluate2()
         {
-            Formula f = new Formula("x5");
+            Formula f = new Formula("x5", normalizer1, validator1);
             Assert.AreEqual(f.Evaluate(v => 22.5), 22.5, 1e-6);
+        }
+
+        public string normalizer1(string s)
+        {
+            return s.ToUpper();
+        }
+
+        public bool validator1(string s)
+        {
+            return true;
         }
 
         /// <summary>
@@ -123,6 +141,14 @@ namespace FormulaTestCases
             Assert.AreEqual(f.Evaluate(Lookup4), 10.0, 1e-6);
         }
 
+        [TestMethod]
+        [ExpectedException(typeof(FormulaEvaluationException))]
+        public void Evaluate4a()
+        {
+            Formula f = new Formula("x + y", normalizer1, validator1);
+            Assert.AreEqual(f.Evaluate(Lookup4), 10.0, 1e-6);
+        }
+
         /// <summary>
         /// This uses one of each kind of token.
         /// </summary>
@@ -142,6 +168,23 @@ namespace FormulaTestCases
         }
 
         [TestMethod]
+
+        public void Evaluate6a()
+        {
+            Formula f = new Formula("(x * x + y) * (z / y) * 1.0");
+            ISet<string> test = f.GetVariables();
+            string[] test2 = new string[3] {"x","y","z"};
+            Assert.AreEqual(f.Evaluate(Lookup4), 29.3333326, 1e-6);
+            int i = 0;
+            foreach(string var in test)
+            {
+                Assert.AreEqual(test2[i], var);
+                i++;
+            }
+        }
+
+
+        [TestMethod]
         [ExpectedException(typeof(FormulaEvaluationException))]
         public void Evaluate7()
         {
@@ -156,6 +199,15 @@ namespace FormulaTestCases
             Assert.AreEqual(f.Evaluate(Lookup4), 1000000000, 1e-6);
         }
 
+        [TestMethod]
+        public void Evaluate8a()
+        {
+            Formula f = new Formula("1.0e9");
+            Formula t = new Formula(f.ToString());
+            Assert.AreEqual(t.Evaluate(Lookup4), 1000000000, 1e-6);
+        }
+
+
 
         [TestMethod]
         [ExpectedException(typeof(FormulaEvaluationException))]
@@ -165,12 +217,38 @@ namespace FormulaTestCases
             Assert.AreEqual(f.Evaluate(Lookup4), 1000000000, 1e-6);
         }
 
+
+        [TestMethod]
+        public void Evaluate10()
+        {
+            Formula f = new Formula();
+            Assert.AreEqual(f.Evaluate(Lookup4),0, 1e-6);
+        }
+
+        [TestMethod]
+        public void Evaluate11()
+        {
+            Formula f = new Formula();
+            double test;
+            Assert.IsTrue(double.TryParse(f.ToString(), out test));
+            Assert.AreEqual(0.0,test);
+        }
+
+        [TestMethod]
+        public void Evaluate12()
+        {
+            Formula f = new Formula();
+            HashSet<string> test = new HashSet<string>(f.GetVariables());
+            Assert.AreEqual(0, test.Count);
+        }
         /// <summary>
         /// A Lookup method that maps x to 4.0, y to 6.0, and z to 8.0.
         /// All other variables result in an UndefinedVariableException.
         /// </summary>
         /// <param name="v"></param>
         /// <returns></returns>
+
+
         public double Lookup4(string v)
         {
             switch (v)

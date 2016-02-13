@@ -50,10 +50,37 @@ namespace Dependencies
     public class DependencyGraph
     {
         /// <summary>
+        /// A dictionary variable that will contain our relationships for the dependency graph.
+        /// Uses a string as the key(dependee) and a hashset to store the values(dependents).
+        /// This Dictionary acts primarily as the parent to children relationship holder
+        /// </summary>
+        private Dictionary<string, HashSet<string>> DependentGraph = null;
+
+        /// <summary>
+        /// A dictionary variable that will contain our relationshps for the dependency graph.
+        /// Uses a sring as the key(dependent) and a hashset to store the values(dependees).
+        /// This Dictionary acts primarily as the child to parents relationship holder.
+        /// </summary>
+        private Dictionary<string, HashSet<string>> DependeeGraph = null;
+
+        /// <summary>
         /// Creates a DependencyGraph containing no dependencies.
         /// </summary>
         public DependencyGraph()
         {
+            DependentGraph = new Dictionary<string, HashSet<string>>();
+            DependeeGraph = new Dictionary<string, HashSet<string>>();
+        }
+
+        /// <summary>
+        /// copies one base DependencyGraph into another DependencyGraph, coping the relationships over to the new one
+        /// They will not affect each other, new graph is not a reference.  Requires a base graph to copy over
+        /// </summary>
+        /// <param name="baseGraph">base graph to copy onto new graph</param>
+        public DependencyGraph(DependencyGraph baseGraph)
+        {
+            DependentGraph = new Dictionary<string, HashSet<string>>(baseGraph.DependentGraph);
+            DependeeGraph = new Dictionary<string, HashSet<string>>(baseGraph.DependeeGraph);
         }
 
         /// <summary>
@@ -61,75 +88,212 @@ namespace Dependencies
         /// </summary>
         public int Size
         {
-            get { return 0; }
+            
+            get
+            {
+                int size = 0;
+                foreach (KeyValuePair<string, HashSet<string>> i in DependentGraph)
+                {
+                    size += i.Value.Count;
+                }
+                return size;
+            }
         }
 
         /// <summary>
         /// Reports whether dependents(s) is non-empty.  Requires s != null.
+        /// If s == null, then throws an ArgumentNullException
         /// </summary>
         public bool HasDependents(string s)
         {
+            if (s == null)
+            {
+                throw new ArgumentNullException("s");
+            }
+            if (DependentGraph.ContainsKey(s))
+            {
+                    return true;
+            }
             return false;
         }
 
         /// <summary>
         /// Reports whether dependees(s) is non-empty.  Requires s != null.
+        /// If s == null, then throws an ArgumentNullException
         /// </summary>
         public bool HasDependees(string s)
         {
+            if (s == null)
+            {
+                throw new ArgumentNullException("s");
+            }
+            if (DependeeGraph.ContainsKey(s))
+            {
+                    return true;
+            }
             return false;
         }
 
         /// <summary>
         /// Enumerates dependents(s).  Requires s != null.
+        /// If s == null, then throws an ArgumentNullException
         /// </summary>
         public IEnumerable<string> GetDependents(string s)
         {
-            return null;
+            if (s == null)
+            {
+                throw new ArgumentNullException("s");
+            }
+
+            if (HasDependents(s))
+            {
+                foreach(string value in DependentGraph[s])//yields each dependent to the parent and returns the value
+                {
+                        yield return value;
+                }
+            }
         }
+
 
         /// <summary>
         /// Enumerates dependees(s).  Requires s != null.
+        /// If s == null, then throws an ArgumentNullException
         /// </summary>
         public IEnumerable<string> GetDependees(string s)
         {
-            return null;
+            
+            if (s == null)
+            {
+                throw new ArgumentNullException("s");
+            }
+
+            if (HasDependees(s))
+            {
+                foreach (string value in DependeeGraph[s])//yields each dependent to the parent and returns the value
+                {
+                    yield return value;
+                }
+            }
         }
+
+
 
         /// <summary>
         /// Adds the dependency (s,t) to this DependencyGraph.
         /// This has no effect if (s,t) already belongs to this DependencyGraph.
         /// Requires s != null and t != null.
+        /// If s || t == null, then throws an ArgumentNullException
         /// </summary>
         public void AddDependency(string s, string t)
         {
+            if (s == null || t == null)
+            {
+                throw new ArgumentNullException("s");
+            }
+
+            if (DependentGraph.ContainsKey(s))//if the dependee is already in the graph, then adds the dependent to that parent
+            {
+                DependentGraph[s].Add(t);//hashset prevents multiple relationships from being readded
+            }
+            else//If the dependee is not in the graph, then adds the dependee and the dependent to the graph
+            {
+                DependentGraph.Add(s, new HashSet<string>());
+                DependentGraph[s].Add(t);
+            }
+
+            if (DependeeGraph.ContainsKey(t))//if the dependee is already in the graph, then adds the dependent to that parent
+            {
+                DependeeGraph[t].Add(s);//hashset prevents multiple relationships from being readded
+            }
+            else//If the dependee is not in the graph, then adds the dependee and the dependent to the graph
+            {
+                DependeeGraph.Add(t, new HashSet<string>());
+                DependeeGraph[t].Add(s);
+            }
         }
 
         /// <summary>
         /// Removes the dependency (s,t) from this DependencyGraph.
         /// Does nothing if (s,t) doesn't belong to this DependencyGraph.
         /// Requires s != null and t != null.
+        /// If s || t == null, then throws an ArgumentNullException
         /// </summary>
         public void RemoveDependency(string s, string t)
         {
+            if (s == null || t == null)
+            {
+                throw new ArgumentNullException("s");
+            }
+            if (DependentGraph.ContainsKey(s) && DependeeGraph.ContainsKey(t))
+            {
+                DependentGraph[s].Remove(t);//Removes the dependency if it exists, else. does nothing.
+                DependeeGraph[t].Remove(s);
+                if (DependentGraph[s].Count == 0)
+                {
+                    DependentGraph.Remove(s);
+                }
+
+                if (DependeeGraph[t].Count == 0)
+                {
+                    DependeeGraph.Remove(t);
+                }
+            }
+
+            
         }
 
         /// <summary>
         /// Removes all existing dependencies of the form (s,r).  Then, for each
         /// t in newDependents, adds the dependency (s,t).
         /// Requires s != null and t != null.
+        /// If s || t == null, then throws an ArgumentNullException
         /// </summary>
         public void ReplaceDependents(string s, IEnumerable<string> newDependents)
         {
+            if (s == null)
+            {
+                throw new ArgumentNullException("s");
+            }
+
+            List<string> children = new List<string>(GetDependents(s));
+
+            foreach(string child in children)
+            {
+                RemoveDependency(s, child);
+            }
+
+            foreach (string Depend in newDependents)
+            {
+                AddDependency(s, Depend);  //Adds all the new dependents using the addDependeny method
+            }
+
         }
 
         /// <summary>
         /// Removes all existing dependencies of the form (r,t).  Then, for each 
         /// s in newDependees, adds the dependency (s,t).
         /// Requires s != null and t != null.
+        /// If s || t == null, then throws an ArgumentNullException
         /// </summary>
         public void ReplaceDependees(string t, IEnumerable<string> newDependees)
         {
+            
+            if (t == null)
+            {
+                throw new ArgumentNullException("t");
+            }
+
+            HashSet<string> parent = new HashSet<string>(GetDependees(t));
+
+            foreach (string dependee in parent)
+            {
+                RemoveDependency(dependee, t);
+            }
+
+            foreach (string newParent in newDependees)
+            {
+                AddDependency(newParent, t);  //adds the new dependees to the list, having t as their dependents
+            }
         }
     }
 }
