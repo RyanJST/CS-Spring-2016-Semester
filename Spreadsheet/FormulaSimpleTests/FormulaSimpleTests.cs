@@ -68,7 +68,7 @@ namespace FormulaTestCases
 
         [TestMethod]
         [ExpectedException(typeof(FormulaFormatException))]
-        public void Construct5()
+        public void Construct5a()
         {
             Formula f = new Formula("-5");
         }

@@ -79,8 +79,19 @@ namespace Dependencies
         /// <param name="baseGraph">base graph to copy onto new graph</param>
         public DependencyGraph(DependencyGraph baseGraph)
         {
-            DependentGraph = new Dictionary<string, HashSet<string>>(baseGraph.DependentGraph);
-            DependeeGraph = new Dictionary<string, HashSet<string>>(baseGraph.DependeeGraph);
+            DependentGraph = new Dictionary<string, HashSet<string>>();
+            DependeeGraph = new Dictionary<string, HashSet<string>>();
+            if (baseGraph.DependentGraph != null)
+            {
+                foreach (KeyValuePair<string, HashSet<string>> pair in baseGraph.DependentGraph)
+                {
+                    foreach (string value in baseGraph.DependentGraph[pair.Key])
+                    {
+                        AddDependency(pair.Key, value);
+                    }
+                }
+            }
+            
         }
 
         /// <summary>
@@ -92,9 +103,12 @@ namespace Dependencies
             get
             {
                 int size = 0;
-                foreach (KeyValuePair<string, HashSet<string>> i in DependentGraph)
+                if (DependentGraph != null)
                 {
-                    size += i.Value.Count;
+                    foreach (KeyValuePair<string, HashSet<string>> i in DependentGraph)
+                    {
+                        size += i.Value.Count;
+                    }
                 }
                 return size;
             }
