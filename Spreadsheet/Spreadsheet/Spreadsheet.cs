@@ -55,7 +55,8 @@ namespace SS
 
         public override ISet<string> SetCellContents(string name, Formula formula)
         {
-            ISet<string> values = null;
+            bool test;
+            ISet<string> values;
             if (name == null || !NameValidation(name))
             {
                 throw new InvalidNameException();
@@ -66,13 +67,24 @@ namespace SS
             }
 
             cellNames[name].Content = formula;
-            throw new NotImplementedException();
+
+            values = getAllDependencies(name, out test);
+
+            if (!test)
+            {
+                throw new CircularException();
+            }
+
+            foreach(string variable in formula.GetVariables())
+            {
+                graph.AddDependency(name, variable);
+            }
+            return values;
         }
 
         public override ISet<string> SetCellContents(string name, string text)
         {
-            ISet<string> values = new HashSet<string>();
-
+            bool test;
             if(text == null)
             {
                 throw new ArgumentNullException("text");
@@ -87,15 +99,13 @@ namespace SS
             }
 
             cellNames[name].Content = text;
-            values.Add(name);
-            string current = name;
-            
-            return values;
+            return getAllDependencies(name, out test);
         }
 
         public override ISet<string> SetCellContents(string name, double number)
         {
             ISet<string> values = null;
+            bool test;
             if (name == null || !NameValidation(name))
             {
                 throw new InvalidNameException();
@@ -106,7 +116,7 @@ namespace SS
             }
 
             cellNames[name].Content = number;
-            throw new NotImplementedException();
+            return getAllDependencies(name, out test);
         }
 
         protected override IEnumerable<string> GetDirectDependents(string name)
@@ -125,14 +135,30 @@ namespace SS
             }
         }
 
-        private ISet<string> getAllDependencies(string name)
+        private ISet<string> getAllDependencies(string name, out bool test)
         {
-            string current = name;
-
-            while (graph.HasDependents(current))
+            List<string> current = new List<string>();
+            current.Add(name);
+            ISet<string> values = new HashSet<string>();
+            values.Add(name);
+            test = true;
+            while(current.Count > 0)
             {
-                foreach()
+                foreach(string child in graph.GetDependents(current[0]))
+                {
+                    if (values.Contains(child))
+                    {
+                        test = false;
+                    }
+                    if (graph.HasDependents(child))
+                    {
+                        current.Add(child);
+                    }
+                    values.Add(child);
+                }
+                current.RemoveAt(0);
             }
+            return values;
         }
 
         private bool NameValidation(string name)
