@@ -66,18 +66,30 @@ namespace SS
                 cellNames.Add(name, new Cell());
             }
 
+            if(cellNames[name].Content != null && cellNames[name].Content is Formula )
+            {
+                Formula form = (Formula)(cellNames[name].Content);
+                foreach (string variable in form.GetVariables())
+                {
+                    graph.RemoveDependency(variable, name);
+                }
+            }
             cellNames[name].Content = formula;
+
+            
+
+            
+
+            foreach(string variable in formula.GetVariables())
+            {
+                graph.AddDependency(variable, name);
+            }
 
             values = getAllDependencies(name, out test);
 
             if (!test)
             {
                 throw new CircularException();
-            }
-
-            foreach(string variable in formula.GetVariables())
-            {
-                graph.AddDependency(name, variable);
             }
             return values;
         }
@@ -98,6 +110,15 @@ namespace SS
                 cellNames.Add(name, new Cell());
             }
 
+            if (cellNames[name].Content != null && cellNames[name].Content is Formula)
+            {
+                Formula form = (Formula)(cellNames[name].Content);
+                foreach (string variable in form.GetVariables())
+                {
+                    graph.RemoveDependency(variable, name);
+                }
+            }
+
             cellNames[name].Content = text;
             return getAllDependencies(name, out test);
         }
@@ -113,6 +134,15 @@ namespace SS
             if (!cellNames.ContainsKey(name))
             {
                 cellNames.Add(name, new Cell());
+            }
+
+            if (cellNames[name].Content != null && cellNames[name].Content is Formula)
+            {
+                Formula form = (Formula)(cellNames[name].Content);
+                foreach (string variable in form.GetVariables())
+                {
+                    graph.RemoveDependency(variable, name);
+                }
             }
 
             cellNames[name].Content = number;
