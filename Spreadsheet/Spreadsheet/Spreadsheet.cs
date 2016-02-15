@@ -25,11 +25,11 @@ namespace SS
 
     }
 
-    class Spreadsheet : AbstractSpreadsheet
+    public class Spreadsheet : AbstractSpreadsheet
     {
         private Dictionary<string, Cell> cellNames;
         private DependencyGraph graph;
-        Spreadsheet()
+        public Spreadsheet()
         {
             cellNames = new Dictionary<string, Cell>();
             graph = new DependencyGraph();
