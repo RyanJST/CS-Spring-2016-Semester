@@ -203,5 +203,19 @@ namespace PS5_tests
 
             Assert.IsTrue(test.Contains("A2"));
         }
+
+        [TestMethod]
+        [ExpectedException(typeof(CircularException))]
+        public void cellContents15()
+        {
+            AbstractSpreadsheet sheet = new Spreadsheet();
+
+            ISet<string> test = sheet.SetCellContents("A1", "test");
+            test = sheet.SetCellContents("A2", new Formula("A3 * 2"));
+            test = sheet.SetCellContents("A3", new Formula("A4 * 2"));
+            test = sheet.SetCellContents("A4", new Formula("A2 * 2"));
+            test = sheet.SetCellContents("A3", 3.0);
+            test = sheet.SetCellContents("A1", "test");
+        }
     }
 }

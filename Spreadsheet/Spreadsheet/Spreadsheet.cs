@@ -149,8 +149,7 @@ namespace SS
         /// </summary>
         public override ISet<string> SetCellContents(string name, Formula formula)
         {
-            bool test;
-            ISet<string> values;
+         
             if (name == null || !NameValidation(name))
             {
                 throw new InvalidNameException();
@@ -347,7 +346,6 @@ namespace SS
         private bool NameValidation(string name)
         {
             int numTest = 0;
-            string fullTest = null;
             if (name.Length > 1)
             {
                 if (char.IsLetter(name[0]) && (int.TryParse(name[1].ToString(), out numTest) && numTest > 0))
