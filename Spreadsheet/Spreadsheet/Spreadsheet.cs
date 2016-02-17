@@ -10,7 +10,7 @@ namespace SS
 {
     class Cell
     {
-        private object contents;
+        private object contents = "";
 
         private object value;
 
@@ -41,15 +41,25 @@ namespace SS
             {
                 throw new InvalidNameException();
             }
+            if (!cellNames.ContainsKey(name))
+            {
+                cellNames.Add(name, new Cell());
+            }
 
             return cellNames[name].Content;
+            
+
+            
         }
 
         public override IEnumerable<string> GetNamesOfAllNonemptyCells()
         {
             foreach(KeyValuePair<string, Cell> pair in cellNames)
             {
-                yield return pair.Key;
+                if (!(pair.Value.Content is string) || (string)(pair.Value.Content) != "")
+                {
+                    yield return pair.Key;
+                }
             }
         }
 
@@ -66,40 +76,40 @@ namespace SS
                 cellNames.Add(name, new Cell());
             }
 
-            if(cellNames[name].Content != null && cellNames[name].Content is Formula )
-            {
-                Formula form = (Formula)(cellNames[name].Content);
-                foreach (string variable in form.GetVariables())
+                if (cellNames[name].Content is Formula)
                 {
-                    graph.RemoveDependency(variable, name);
+                    Formula form = (Formula)(cellNames[name].Content);
+                    foreach (string variable in form.GetVariables())
+                    {
+                        if (NameValidation(variable))
+                        {
+                            graph.RemoveDependency(variable, name);
+                        }
+                    }
                 }
-            }
+            
             cellNames[name].Content = formula;
-
-            
-
-            
 
             foreach(string variable in formula.GetVariables())
             {
-                graph.AddDependency(variable, name);
+                if (NameValidation(variable))
+                {
+                    if (!cellNames.ContainsKey(variable))
+                    {
+                        cellNames.Add(variable, new Cell());
+                    }
+                    graph.AddDependency(variable, name);
+                }
             }
 
-            values = getAllDependencies(name, out test);
-
-            if (!test)
-            {
-                throw new CircularException();
-            }
-            return values;
+            return getAllDependencies(name);
         }
 
         public override ISet<string> SetCellContents(string name, string text)
         {
-            bool test;
             if(text == null)
             {
-                throw new ArgumentNullException("text");
+                throw new ArgumentNullException(text);
             }
             if (name == null || !NameValidation(name))
             {
@@ -110,23 +120,24 @@ namespace SS
                 cellNames.Add(name, new Cell());
             }
 
-            if (cellNames[name].Content != null && cellNames[name].Content is Formula)
+            if (cellNames[name].Content is Formula)
             {
                 Formula form = (Formula)(cellNames[name].Content);
                 foreach (string variable in form.GetVariables())
                 {
-                    graph.RemoveDependency(variable, name);
+                    if (NameValidation(variable))
+                    {
+                        graph.RemoveDependency(variable, name);
+                    }
                 }
             }
 
             cellNames[name].Content = text;
-            return getAllDependencies(name, out test);
+            return getAllDependencies(name);
         }
 
         public override ISet<string> SetCellContents(string name, double number)
         {
-            ISet<string> values = null;
-            bool test;
             if (name == null || !NameValidation(name))
             {
                 throw new InvalidNameException();
@@ -136,17 +147,20 @@ namespace SS
                 cellNames.Add(name, new Cell());
             }
 
-            if (cellNames[name].Content != null && cellNames[name].Content is Formula)
+            if (cellNames[name].Content is Formula)
             {
                 Formula form = (Formula)(cellNames[name].Content);
                 foreach (string variable in form.GetVariables())
                 {
-                    graph.RemoveDependency(variable, name);
+                    if (NameValidation(variable))
+                    {
+                        graph.RemoveDependency(variable, name);
+                    }
                 }
             }
 
             cellNames[name].Content = number;
-            return getAllDependencies(name, out test);
+            return getAllDependencies(name);
         }
 
         protected override IEnumerable<string> GetDirectDependents(string name)
@@ -165,20 +179,19 @@ namespace SS
             }
         }
 
-        private ISet<string> getAllDependencies(string name, out bool test)
+        private ISet<string> getAllDependencies(string name)
         {
             List<string> current = new List<string>();
             current.Add(name);
             ISet<string> values = new HashSet<string>();
             values.Add(name);
-            test = true;
             while(current.Count > 0)
             {
                 foreach(string child in graph.GetDependents(current[0]))
                 {
-                    if (values.Contains(child))
+                    if (child == name)
                     {
-                        test = false;
+                        throw new CircularException();
                     }
                     if (graph.HasDependents(child))
                     {
