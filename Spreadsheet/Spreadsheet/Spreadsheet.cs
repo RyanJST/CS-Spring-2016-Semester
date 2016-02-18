@@ -104,7 +104,8 @@ namespace SS
         /// </summary>
         public override object GetCellContents(string name)
         {
-            if(name == null || !NameValidation(name))
+            name = name.ToUpper();
+            if (name == null || !NameValidation(name))
             {
                 throw new InvalidNameException();
             }
@@ -149,7 +150,7 @@ namespace SS
         /// </summary>
         public override ISet<string> SetCellContents(string name, Formula formula)
         {
-         
+            name = name.ToUpper();
             if (name == null || !NameValidation(name))
             {
                 throw new InvalidNameException();
@@ -164,9 +165,10 @@ namespace SS
                     Formula form = (Formula)(cellNames[name].Content);
                     foreach (string variable in form.GetVariables())
                     {
+                        
                         if (NameValidation(variable))
                         {
-                            graph.RemoveDependency(variable, name);
+                        graph.RemoveDependency(variable.ToUpper(), name);
                         }
                     }
                 }
@@ -177,15 +179,21 @@ namespace SS
             {
                 if (NameValidation(variable))
                 {
-                    if (!cellNames.ContainsKey(variable))
+                    if (!cellNames.ContainsKey(variable.ToUpper()))
                     {
-                        cellNames.Add(variable, new Cell());
+                        cellNames.Add(variable.ToUpper(), new Cell());
                     }
-                    graph.AddDependency(variable, name);
+                    graph.AddDependency(variable.ToUpper(), name);
                 }
             }
 
-            return getAllDependencies(name);
+            HashSet<string> result = new HashSet<string>();
+            foreach (string child in GetCellsToRecalculate(name))
+            {
+                result.Add(child);
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -202,7 +210,8 @@ namespace SS
         /// </summary>
         public override ISet<string> SetCellContents(string name, string text)
         {
-            if(text == null)
+            name = name.ToUpper();
+            if (text == null)
             {
                 throw new ArgumentNullException(text);
             }
@@ -222,13 +231,20 @@ namespace SS
                 {
                     if (NameValidation(variable))
                     {
-                        graph.RemoveDependency(variable, name);
+                        graph.RemoveDependency(variable.ToUpper(), name);
                     }
                 }
             }
 
             cellNames[name].Content = text;
-            return getAllDependencies(name);
+
+            HashSet<string> result = new HashSet<string>();
+            foreach (string child in GetCellsToRecalculate(name))
+            {
+                result.Add(child);
+            }
+
+            return result;
         }
 
 
@@ -244,6 +260,7 @@ namespace SS
         /// </summary>
         public override ISet<string> SetCellContents(string name, double number)
         {
+            name = name.ToUpper();
             if (name == null || !NameValidation(name))
             {
                 throw new InvalidNameException();
@@ -260,13 +277,20 @@ namespace SS
                 {
                     if (NameValidation(variable))
                     {
-                        graph.RemoveDependency(variable, name);
+                        graph.RemoveDependency(variable.ToUpper(), name);
                     }
                 }
             }
 
             cellNames[name].Content = number;
-            return getAllDependencies(name);
+
+            HashSet<string> result = new HashSet<string>();
+            foreach(string child in GetCellsToRecalculate(name))
+            {
+                result.Add(child);
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -288,7 +312,8 @@ namespace SS
         /// </summary>
         protected override IEnumerable<string> GetDirectDependents(string name)
         {
-            if(name == null)
+            name = name.ToUpper();
+            if (name == null)
             {
                 throw new ArgumentNullException(name);
             }
@@ -302,37 +327,7 @@ namespace SS
             }
         }
 
-        /// <summary>
-        /// this private method finds all dependencies of a cell, direct and indirect.
-        /// It will return as a iset, and is used by setCellContents, to return all dependencies
-        /// </summary>
-        /// <param name="name">The name of the cell to find all dependencies, direct or indirect</param>
-        /// <returns></returns>
-        private ISet<string> getAllDependencies(string name)
-        {
-            List<string> current = new List<string>();
-            current.Add(name);
-            ISet<string> values = new HashSet<string>();
-            values.Add(name);
-            while(current.Count > 0)
-            {
-                foreach(string child in graph.GetDependents(current[0]))
-                {
-                    if (child == name)
-                    {
-                        throw new CircularException();
-                    }
-                    if (graph.HasDependents(child))
-                    {
-                        current.Add(child);
-                    }
-                    values.Add(child);
-                }
-                current.RemoveAt(0);
-            }
-            return values;
-        }
-
+        
         /// <summary>
         /// A private method that will validate on whether a cell name is a valid name.
         /// If the inputed name is valid
@@ -345,6 +340,7 @@ namespace SS
         /// <returns></returns>
         private bool NameValidation(string name)
         {
+            name = name.ToUpper();
             int numTest = 0;
             if (name.Length > 1)
             {
