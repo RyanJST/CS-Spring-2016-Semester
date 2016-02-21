@@ -391,17 +391,13 @@ namespace SS
         {
             double test;
             ISet<string> result;
-            name = name.ToUpper();
+            
             if (name == null || !NameValidation(name))
             {
                 throw new InvalidNameException();
             }
-            //if (!cellNames.ContainsKey(name))
-            //{
-            //    cellNames.Add(name, new Cell());
-            //}
-
-            if(double.TryParse(content, out test)){
+            name = name.ToUpper();
+            if (double.TryParse(content, out test)){
                 result = SetCellContents(name, test);
             }
 
