@@ -218,20 +218,20 @@ namespace SS
                 cellNames.Add(name, new Cell());
             }
 
-                if (cellNames[name].Content is Formula)
-                {
-                    Formula form = (Formula)(cellNames[name].Content);
-                    foreach (string variable in form.GetVariables())
-                    {
+                //if (cellNames[name].Content is Formula)
+                //{
+                //    Formula form = (Formula)(cellNames[name].Content);
+                //    foreach (string variable in form.GetVariables())
+                //    {
                         
-                        if (NameValidation(variable))
-                        {
-                        graph.RemoveDependency(variable.ToUpper(), name);
-                        }
-                    }
-                }
+                //        if (NameValidation(variable))
+                //        {
+                //        graph.RemoveDependency(variable.ToUpper(), name);
+                //        }
+                //    }
+                //}
 
-            
+            List<string> nameList = new List<string>();
             
 
             foreach(string variable in formula.GetVariables())
@@ -242,16 +242,18 @@ namespace SS
                     {
                         cellNames.Add(variable.ToUpper(), new Cell());
                     }
-
-                    graph.AddDependency(variable.ToUpper(), name);
+                    nameList.Add(variable);
+                    
                 }
             }
+
 
             HashSet<string> result = new HashSet<string>();
             foreach (string child in GetCellsToRecalculate(name))
             {
                 result.Add(child);
             }
+            graph.ReplaceDependees(name, nameList);
             cellNames[name].Content = formula;
             return result;
         }
