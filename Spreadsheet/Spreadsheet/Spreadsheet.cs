@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Formulas;
 using Dependencies;
@@ -20,6 +21,8 @@ namespace SS
         /// </summary>
         private object contents = "";
 
+        private object values = "";
+
         /// <summary>
         /// Sets the contents of the cell and returns them if needed.
         /// </summary>
@@ -31,6 +34,30 @@ namespace SS
                 contents = value;
             }
         }
+
+        public object Value
+        {
+            get
+            {
+                return values;
+            }
+        }
+
+        public void changeValues(Dictionary<string, Cell> lookup)
+        {
+            if(contents is Formula)
+            {
+                Formula form = (Formula)contents;
+                values = form.Evaluate(s => (double)lookup[s].values);
+            }
+
+            else
+            {
+                values = contents;
+            }
+        }
+      
+        
     }
     /// <summary>
     /// An AbstractSpreadsheet object represents the state of a simple spreadsheet.  A 
@@ -88,14 +115,30 @@ namespace SS
         /// </summary>
         private DependencyGraph graph;
 
+        private Regex IsValid;
+
+        private Regex nameValid;
+
         /// <summary>
         /// A default constructor that sets up a new empty spreadsheet for the program.
         /// </summary>
         public Spreadsheet()
         {
+            nameValid = new Regex(@"^[A-Z]+ [1-9][0-9]*$");
+            IsValid = new Regex(".*");
             cellNames = new Dictionary<string, Cell>();
             graph = new DependencyGraph();
         }
+
+        public Spreadsheet(Regex isValid)
+        {
+            nameValid = new Regex(@"^[A-Z]+ [1-9][0-9]*$");
+            IsValid = isValid;
+            cellNames = new Dictionary<string, Cell>();
+            graph = new DependencyGraph();
+        }
+
+
 
         // ADDED FOR PS6
         /// <summary>
@@ -208,11 +251,6 @@ namespace SS
         protected  override ISet<string> SetCellContents(string name, Formula formula)
         {
 
-            if (name == null || !NameValidation(name))
-            {
-                throw new InvalidNameException();
-            }
-            name = name.ToUpper();
             if (!cellNames.ContainsKey(name))
             {
                 cellNames.Add(name, new Cell());
@@ -277,11 +315,6 @@ namespace SS
             {
                 throw new ArgumentNullException(text);
             }
-            if (name == null || !NameValidation(name))
-            {
-                throw new InvalidNameException();
-            }
-            name = name.ToUpper();
             if (!cellNames.ContainsKey(name))
             {
                 cellNames.Add(name, new Cell());
@@ -323,12 +356,6 @@ namespace SS
         /// </summary>
         protected override ISet<string> SetCellContents(string name, double number)
         {
-
-            if (name == null || !NameValidation(name))
-            {
-                throw new InvalidNameException();
-            }
-            name = name.ToUpper();
             if (!cellNames.ContainsKey(name))
             {
                 cellNames.Add(name, new Cell());
@@ -394,7 +421,7 @@ namespace SS
             double test;
             ISet<string> result;
             
-            if (name == null || !NameValidation(name))
+            if (name == null || !IsValid.IsMatch(name))
             {
                 throw new InvalidNameException();
             }
@@ -405,7 +432,9 @@ namespace SS
 
             else if(content[0] == '=')
             {
-                 result = SetCellContents(name, new Formula(content));
+                string edited = content.Remove(0);
+                
+                result = SetCellContents(name, new Formula(edited, s => s.ToUpper(), s => nameValid.IsMatch(s)));
             }
 
             else
