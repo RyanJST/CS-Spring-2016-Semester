@@ -123,11 +123,12 @@ namespace SS
         /// </summary>
         public override object GetCellContents(string name)
         {
-            name = name.ToUpper();
+
             if (name == null || !NameValidation(name))
             {
                 throw new InvalidNameException();
             }
+            name = name.ToUpper();
             if (!cellNames.ContainsKey(name))
             {
                 cellNames.Add(name, new Cell());
@@ -206,11 +207,12 @@ namespace SS
         /// </summary>
         protected  override ISet<string> SetCellContents(string name, Formula formula)
         {
-            name = name.ToUpper();
+
             if (name == null || !NameValidation(name))
             {
                 throw new InvalidNameException();
             }
+            name = name.ToUpper();
             if (!cellNames.ContainsKey(name))
             {
                 cellNames.Add(name, new Cell());
@@ -228,8 +230,9 @@ namespace SS
                         }
                     }
                 }
+
             
-            cellNames[name].Content = formula;
+            
 
             foreach(string variable in formula.GetVariables())
             {
@@ -239,6 +242,7 @@ namespace SS
                     {
                         cellNames.Add(variable.ToUpper(), new Cell());
                     }
+
                     graph.AddDependency(variable.ToUpper(), name);
                 }
             }
@@ -248,7 +252,7 @@ namespace SS
             {
                 result.Add(child);
             }
-
+            cellNames[name].Content = formula;
             return result;
         }
 
@@ -266,7 +270,7 @@ namespace SS
         /// </summary>
         protected override ISet<string> SetCellContents(string name, string text)
         {
-            name = name.ToUpper();
+
             if (text == null)
             {
                 throw new ArgumentNullException(text);
@@ -275,6 +279,7 @@ namespace SS
             {
                 throw new InvalidNameException();
             }
+            name = name.ToUpper();
             if (!cellNames.ContainsKey(name))
             {
                 cellNames.Add(name, new Cell());
@@ -316,11 +321,12 @@ namespace SS
         /// </summary>
         protected override ISet<string> SetCellContents(string name, double number)
         {
-            name = name.ToUpper();
+
             if (name == null || !NameValidation(name))
             {
                 throw new InvalidNameException();
             }
+            name = name.ToUpper();
             if (!cellNames.ContainsKey(name))
             {
                 cellNames.Add(name, new Cell());
@@ -430,7 +436,7 @@ namespace SS
         /// </summary>
         protected override IEnumerable<string> GetDirectDependents(string name)
         {
-            name = name.ToUpper();
+
             if (name == null)
             {
                 throw new ArgumentNullException(name);
@@ -439,7 +445,8 @@ namespace SS
             {
                 throw new InvalidNameException();
             }
-            foreach(string child in graph.GetDependents(name))
+            name = name.ToUpper();
+            foreach (string child in graph.GetDependents(name))
             {
                 yield return child;
             }
