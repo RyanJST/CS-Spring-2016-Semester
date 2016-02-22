@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using Formulas;
 using Dependencies;
 using System.IO;
+using System.Xml;
+using System.Xml.Schema;
 
 namespace SS
 {
@@ -48,7 +50,24 @@ namespace SS
             if(contents is Formula)
             {
                 Formula form = (Formula)contents;
-                values = form.Evaluate(s => (double)lookup[s].values);
+                try {
+                    values = form.Evaluate(s => (double)lookup[s].values);
+                }
+                catch (Exception e)
+                {
+                    if (e is CircularException)
+                    {
+                        values = new FormulaError("Created Circular Dependency");
+                    }
+                    else if(e is FormulaFormatException)
+                    {
+                        values = new FormulaError("Incorrect formatting of formula.");
+                    }
+                    else if (e is FormulaEvaluationException)
+                    {
+                        values = new FormulaError("Error evaluting formula");
+                    }
+                }
             }
 
             else
@@ -119,26 +138,56 @@ namespace SS
 
         private Regex nameValid;
 
+        private bool change;
+
         /// <summary>
         /// A default constructor that sets up a new empty spreadsheet for the program.
         /// </summary>
         public Spreadsheet()
         {
-            nameValid = new Regex(@"^[A-Z]+ [1-9][0-9]*$");
-            IsValid = new Regex(".*");
+            nameValid = new Regex(@"^[A-Z]+[1-9][0-9]*$");
+            IsValid = new Regex("^.*$");
             cellNames = new Dictionary<string, Cell>();
             graph = new DependencyGraph();
+            change = false;
         }
 
         public Spreadsheet(Regex isValid)
         {
-            nameValid = new Regex(@"^[A-Z]+ [1-9][0-9]*$");
+            nameValid = new Regex(@"^[A-Z]+[1-9][0-9]*$");
             IsValid = isValid;
             cellNames = new Dictionary<string, Cell>();
             graph = new DependencyGraph();
+            change = false;
         }
 
+        public Spreadsheet(TextReader source)
+        {
+            XmlSchemaSet sc = new XmlSchemaSet();
+            TextReader test = source;
+            XmlReaderSettings settings = new XmlReaderSettings();
+            settings.ValidationType = ValidationType.Schema;
+            settings.Schemas = sc;
+            settings.ValidationEventHandler += ValidationCallback;
+            if (Directory.Exists(source))
+            {
+                using (XmlReader reader = XmlReader.Create(source))
+                {
+                    while (reader.Read())
+                    {
+                        switch (reader.Name)
+                        {
+                            case "Spreadsheet":
+                                break;
+                            case "cell":
+                                SetContentsOfCell(reader["name"], reader["contents"]);
+                                break;
+                        }
+                    }
+                }
+            }
 
+        }
 
         // ADDED FOR PS6
         /// <summary>
@@ -147,14 +196,15 @@ namespace SS
         /// </summary>
         public override bool Changed
         {
+            
             get
             {
-                throw new NotImplementedException();
+                return change;
             }
 
             protected set
             {
-                throw new NotImplementedException();
+                change = value;
             }
         }
 
@@ -177,10 +227,7 @@ namespace SS
                 cellNames.Add(name, new Cell());
             }
 
-            return cellNames[name].Content;
-            
-
-            
+            return cellNames[name].Content;  
         }
         // ADDED FOR PS6
         /// <summary>
@@ -191,7 +238,17 @@ namespace SS
         /// </summary>
         public override object GetCellValue(string name)
         {
-            throw new NotImplementedException();
+            if (name == null || !NameValidation(name))
+            {
+                throw new InvalidNameException();
+            }
+            name = name.ToUpper();
+            if (!cellNames.ContainsKey(name))
+            {
+                cellNames.Add(name, new Cell());
+            }
+
+            return cellNames[name].Value;
         }
 
         /// <summary>
@@ -230,7 +287,24 @@ namespace SS
         /// </summary>
         public override void Save(TextWriter dest)
         {
-            throw new NotImplementedException();
+            using (XmlWriter writer = XmlWriter.Create(dest))
+            {
+                writer.WriteStartDocument();
+                writer.WriteStartElement("Spreadsheet");
+                writer.WriteAttributeString("IsValid", IsValid.ToString());
+
+                foreach(string cellName in GetNamesOfAllNonemptyCells())
+                {
+                    writer.WriteStartElement("cell");
+                    writer.WriteAttributeString("name", cellName);
+                    writer.WriteAttributeString("contents", cellNames[cellName].Content.ToString());
+                    writer.WriteEndElement();
+                }
+
+                writer.WriteEndElement();
+                writer.WriteEndDocument();
+            }
+            Changed = false;
         }
 
         /// <summary>
@@ -255,43 +329,16 @@ namespace SS
             {
                 cellNames.Add(name, new Cell());
             }
-
-                //if (cellNames[name].Content is Formula)
-                //{
-                //    Formula form = (Formula)(cellNames[name].Content);
-                //    foreach (string variable in form.GetVariables())
-                //    {
-                        
-                //        if (NameValidation(variable))
-                //        {
-                //        graph.RemoveDependency(variable.ToUpper(), name);
-                //        }
-                //    }
-                //}
-
-            List<string> nameList = new List<string>();
-            
-
             foreach(string variable in formula.GetVariables())
             {
-                if (NameValidation(variable))
-                {
-                    if (!cellNames.ContainsKey(variable.ToUpper()))
+                    if (!cellNames.ContainsKey(variable))
                     {
-                        cellNames.Add(variable.ToUpper(), new Cell());
+                        cellNames.Add(variable, new Cell());
                     }
-                    nameList.Add(variable);
-                    
-                }
             }
-
-
-            HashSet<string> result = new HashSet<string>();
-            foreach (string child in GetCellsToRecalculate(name))
-            {
-                result.Add(child);
-            }
-            graph.ReplaceDependees(name, nameList);
+            graph.ReplaceDependees(name, formula.GetVariables());
+            ISet<string> result = new HashSet<string>(GetCellsToRecalculate(name));
+            
             cellNames[name].Content = formula;
             return result;
         }
@@ -310,11 +357,6 @@ namespace SS
         /// </summary>
         protected override ISet<string> SetCellContents(string name, string text)
         {
-
-            if (text == null)
-            {
-                throw new ArgumentNullException(text);
-            }
             if (!cellNames.ContainsKey(name))
             {
                 cellNames.Add(name, new Cell());
@@ -334,13 +376,9 @@ namespace SS
 
             cellNames[name].Content = text;
 
-            HashSet<string> result = new HashSet<string>();
-            foreach (string child in GetCellsToRecalculate(name))
-            {
-                result.Add(child);
-            }
-
-            return result;
+            
+            return new HashSet<String>(GetCellsToRecalculate(name));
+            
         }
 
 
@@ -375,13 +413,7 @@ namespace SS
 
             cellNames[name].Content = number;
 
-            HashSet<string> result = new HashSet<string>();
-            foreach(string child in GetCellsToRecalculate(name))
-            {
-                result.Add(child);
-            }
-
-            return result;
+            return new HashSet<string>(GetCellsToRecalculate(name));
         }
 
         // ADDED FOR PS6
@@ -421,18 +453,23 @@ namespace SS
             double test;
             ISet<string> result;
             
-            if (name == null || !IsValid.IsMatch(name))
+            if (name == null || !NameValidation(name))
             {
                 throw new InvalidNameException();
+            }
+
+            if(content == null)
+            {
+                throw new ArgumentNullException();
             }
             name = name.ToUpper();
             if (double.TryParse(content, out test)){
                 result = SetCellContents(name, test);
             }
 
-            else if(content[0] == '=')
+            else if(content.Length >=1 && content[0] == '=')
             {
-                string edited = content.Remove(0);
+                string edited = content.Remove(0,1);
                 
                 result = SetCellContents(name, new Formula(edited, s => s.ToUpper(), s => nameValid.IsMatch(s)));
             }
@@ -441,6 +478,11 @@ namespace SS
             {
                 result = SetCellContents(name, content);
             }
+            foreach (string recalc in result)
+            {
+                cellNames[recalc].changeValues(cellNames);
+            }
+            Changed = true;
             return result;
         }
 
@@ -472,7 +514,6 @@ namespace SS
             {
                 throw new InvalidNameException();
             }
-            name = name.ToUpper();
             foreach (string child in graph.GetDependents(name))
             {
                 yield return child;
@@ -493,22 +534,16 @@ namespace SS
         private bool NameValidation(string name)
         {
             name = name.ToUpper();
-            int numTest = 0;
-            if (name.Length > 1)
+            if(!IsValid.IsMatch(name) || !nameValid.IsMatch(name))
             {
-                if (char.IsLetter(name[0]) && (int.TryParse(name[1].ToString(), out numTest) && numTest > 0))
-                {
-                    for (int i = 2; i < name.Length; i++)
-                    {
-                        if(!int.TryParse(name[i].ToString(), out numTest))
-                        {
-                            return false;
-                        }
-                    }
-                    return true;
-                }
+                return false;
             }
-            return false;
+            return true;
+        }
+
+        private static void ValidationCallback(object sender, ValidationEventArgs e)
+        {
+            Console.WriteLine(" *** Validation Error: {0}", e.Message);
         }
     }
 }
