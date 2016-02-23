@@ -164,29 +164,36 @@ namespace SS
         public Spreadsheet(TextReader source)
         {
             XmlSchemaSet sc = new XmlSchemaSet();
+            XmlTextReader scheme = new XmlTextReader("Spreadsheet.xsd");
+            XmlSchema myschema = XmlSchema.Read(scheme, ValidationCallback);
+            sc.Add(myschema);
             TextReader test = source;
             XmlReaderSettings settings = new XmlReaderSettings();
             settings.ValidationType = ValidationType.Schema;
             settings.Schemas = sc;
             settings.ValidationEventHandler += ValidationCallback;
-            if (Directory.Exists(source))
-            {
-                using (XmlReader reader = XmlReader.Create(source))
+            nameValid = new Regex(@"^[A-Z]+[1-9][0-9]*$");
+            cellNames = new Dictionary<string, Cell>();
+            graph = new DependencyGraph();
+            change = false;
+                using (XmlReader reader = XmlReader.Create(source, settings))
                 {
                     while (reader.Read())
                     {
                         switch (reader.Name)
                         {
                             case "Spreadsheet":
+                            if (reader.NodeType != XmlNodeType.EndElement)
+                            {
+                                IsValid = new Regex(reader["IsValid"]);
+                            }
                                 break;
                             case "cell":
                                 SetContentsOfCell(reader["name"], reader["contents"]);
                                 break;
                         }
                     }
-                }
-            }
-
+                }          
         }
 
         // ADDED FOR PS6
@@ -287,22 +294,36 @@ namespace SS
         /// </summary>
         public override void Save(TextWriter dest)
         {
-            using (XmlWriter writer = XmlWriter.Create(dest))
-            {
-                writer.WriteStartDocument();
-                writer.WriteStartElement("Spreadsheet");
-                writer.WriteAttributeString("IsValid", IsValid.ToString());
-
-                foreach(string cellName in GetNamesOfAllNonemptyCells())
+            try {
+                using (XmlWriter writer = XmlWriter.Create(dest))
                 {
-                    writer.WriteStartElement("cell");
-                    writer.WriteAttributeString("name", cellName);
-                    writer.WriteAttributeString("contents", cellNames[cellName].Content.ToString());
-                    writer.WriteEndElement();
-                }
+                    writer.WriteStartDocument();
+                    writer.WriteStartElement("Spreadsheet");
+                    writer.WriteAttributeString("IsValid", IsValid.ToString());
 
-                writer.WriteEndElement();
-                writer.WriteEndDocument();
+                    foreach (string cellName in GetNamesOfAllNonemptyCells())
+                    {
+                        writer.WriteStartElement("cell");
+                        writer.WriteAttributeString("name", cellName);
+                        if (cellNames[cellName].Content is Formula)
+                        {
+                            writer.WriteAttributeString("contents", "=" + cellNames[cellName].Content.ToString());
+                        }
+                        else
+                        {
+                            writer.WriteAttributeString("contents", cellNames[cellName].Content.ToString());
+                        }
+                        writer.WriteEndElement();
+                    }
+
+                    writer.WriteEndElement();
+                    writer.WriteEndDocument();
+                }
+            }
+
+            catch
+            {
+                throw new IOException();
             }
             Changed = false;
         }

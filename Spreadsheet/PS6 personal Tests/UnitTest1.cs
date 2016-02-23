@@ -371,6 +371,7 @@ namespace PS6_personal_Tests
             }
         }
 
+        [TestMethod]
         public void Test31b()
         {
             AbstractSpreadsheet s = new Spreadsheet();
@@ -390,12 +391,51 @@ namespace PS6_personal_Tests
             s.SetContentsOfCell("D7", "=E1");
             s.SetContentsOfCell("D8", "=E1");
             ISet<String> cells = s.SetContentsOfCell("E1", "0");
-            using (TextWriter test = File.CreateText(".."))
-            s.Save();
+            using (TextWriter dest = File.CreateText("C:\\Users\\Lora E. Cooper\\Desktop\\spreasheet.xml"))
+            {
+                s.Save(dest);
+            }
+        }
+
+        [TestMethod]
+        public void Test31c()
+        {
+            AbstractSpreadsheet s = new Spreadsheet();
+            AbstractSpreadsheet test;
+            s.SetContentsOfCell("A1", "=B1+B2");
+            s.SetContentsOfCell("B1", "=C1-C2");
+            s.SetContentsOfCell("B2", "=C3*C4");
+            s.SetContentsOfCell("C1", "=D1*D2");
+            s.SetContentsOfCell("C2", "=D3*D4");
+            s.SetContentsOfCell("C3", "=D5*D6");
+            s.SetContentsOfCell("C4", "=D7*D8");
+            s.SetContentsOfCell("D1", "=E1");
+            s.SetContentsOfCell("D2", "=E1");
+            s.SetContentsOfCell("D3", "=E1");
+            s.SetContentsOfCell("D4", "=E1");
+            s.SetContentsOfCell("D5", "=E1");
+            s.SetContentsOfCell("D6", "=E1");
+            s.SetContentsOfCell("D7", "=E1");
+            s.SetContentsOfCell("D8", "=E1");
+            ISet<String> cells = s.SetContentsOfCell("E1", "0");
+            using (TextWriter dest = File.CreateText("C:\\Users\\Lora E. Cooper\\Desktop\\spreasheet.xml"))
+            {
+                s.Save(dest);
+            }
+
+            using (TextReader baseVer = File.OpenText("C:\\Users\\Lora E. Cooper\\Desktop\\spreasheet.xml"))
+            {
+                test = new Spreadsheet(baseVer);
+            }
+
+            using (TextWriter dest = File.CreateText("C:\\Users\\Lora E. Cooper\\Desktop\\spreasheet2.xml"))
+            {
+                test.Save(dest);
+            }
         }
 
         [TestMethod()]
-        public void Test31c()
+        public void Test31d()
         {
             AbstractSpreadsheet s = new Spreadsheet();
             s.SetContentsOfCell("A1", "=B1+B2");
