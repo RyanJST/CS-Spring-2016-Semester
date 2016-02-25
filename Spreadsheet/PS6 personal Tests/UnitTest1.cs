@@ -463,6 +463,64 @@ namespace PS6_personal_Tests
             Assert.AreEqual(25.0, s.GetCellValue("C3"));
             Assert.AreEqual(25.0, s.GetCellValue("C4"));
         }
+
+        [TestMethod]
+
+        public void TestSave01()
+        {
+            AbstractSpreadsheet s = new Spreadsheet();
+            s.SetContentsOfCell("A1", "=B1+B2");
+            s.SetContentsOfCell("B1", "=C1-C2");
+            s.SetContentsOfCell("B2", "=C3*C4");
+            s.SetContentsOfCell("C1", "=D1*D2");
+            s.SetContentsOfCell("C2", "=D3*D4");
+            s.SetContentsOfCell("C3", "=D5*D6");
+            s.SetContentsOfCell("C4", "=D7*D8");
+            s.SetContentsOfCell("D1", "=E1");
+            s.SetContentsOfCell("D2", "=E1");
+            s.SetContentsOfCell("D3", "=E1");
+            s.SetContentsOfCell("D4", "=E2");
+            s.SetContentsOfCell("D5", "=E1");
+            s.SetContentsOfCell("D6", "=E1");
+            s.SetContentsOfCell("D7", "=E1");
+            s.SetContentsOfCell("D8", "=E2");
+            ISet<String> cells = s.SetContentsOfCell("E1", "5.00");
+
+            ISet<String> cells2 = s.SetContentsOfCell("E2", "2.00");
+
+            Assert.AreEqual(265.00, s.GetCellValue("A1"));
+
+
+        }
+
+
+        [TestMethod]
+        public void TestSave02()
+        {
+            AbstractSpreadsheet s = new Spreadsheet();
+            s.SetContentsOfCell("A1", "=B1+B2");
+            s.SetContentsOfCell("B1", "=C1-C2");
+            s.SetContentsOfCell("B2", "=C3*C4");
+            s.SetContentsOfCell("C1", "=D1*D2");
+            s.SetContentsOfCell("C2", "=D3*D4");
+            s.SetContentsOfCell("C3", "=D5*D6");
+            s.SetContentsOfCell("C4", "=D7*D8");
+            s.SetContentsOfCell("D1", "=E1");
+            s.SetContentsOfCell("D2", "=E1");
+            s.SetContentsOfCell("D3", "=E1");
+            s.SetContentsOfCell("D4", "=E2");
+            s.SetContentsOfCell("D5", "=E1");
+            s.SetContentsOfCell("D6", "=E1");
+            s.SetContentsOfCell("D7", "=E1");
+            s.SetContentsOfCell("D8", "=E2");
+            //ISet<String> cells = s.SetContentsOfCell("E1", "5.00");
+
+            ISet<String> cells2 = s.SetContentsOfCell("E2", "2.00");
+
+            Assert.IsTrue(s.GetCellValue("A1") is FormulaError);
+
+
+        }
         [TestMethod()]
         public void Test32()
         {

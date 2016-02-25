@@ -23,6 +23,10 @@ namespace SS
         /// </summary>
         private object contents = "";
 
+        /// <summary>
+        /// Holds the calculated value of the contents of the cell after evalution.
+        /// Will hold a string, double, or Formula Error
+        /// </summary>
         private object values = "";
 
         /// <summary>
@@ -37,6 +41,9 @@ namespace SS
             }
         }
 
+        /// <summary>
+        /// Returns the value of the current cell
+        /// </summary>
         public object Value
         {
             get
@@ -45,13 +52,17 @@ namespace SS
             }
         }
 
+        /// <summary>
+        /// Recalculates the value of the current cell
+        /// </summary>
+        /// <param name="lookup"></param>
         public void changeValues(Dictionary<string, Cell> lookup)
         {
             if(contents is Formula)
             {
                 Formula form = (Formula)contents;
                 try {
-                    values = form.Evaluate(s => (double)lookup[s].values);
+                    values = form.Evaluate(s => lookupMethod(lookup, s));
                 }
                 catch (Exception e)
                 {
@@ -75,7 +86,22 @@ namespace SS
                 values = contents;
             }
         }
-      
+        
+        /// <summary>
+        /// Looks up the value of other cells when needed.
+        /// </summary>
+        /// <param name="cellTable"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        private double lookupMethod(Dictionary<string, Cell> cellTable, string name)
+        {
+            if(!(cellTable[name].values is double) && !(cellTable[name].values is Formula))
+            {
+                throw new UndefinedVariableException(name);
+            }
+
+            return (double)cellTable[name].values;
+        }
         
     }
     /// <summary>
@@ -152,6 +178,10 @@ namespace SS
             change = false;
         }
 
+        /// <summary>
+        /// Create a spreadsheet that checkks any potential cell names against 
+        /// </summary>
+        /// <param name="isValid"></param>
         public Spreadsheet(Regex isValid)
         {
             nameValid = new Regex(@"^[A-Z]+[1-9][0-9]*$");
@@ -182,7 +212,7 @@ namespace SS
                     {
                         switch (reader.Name)
                         {
-                            case "Spreadsheet":
+                            case "spreadsheet":
                             if (reader.NodeType != XmlNodeType.EndElement)
                             {
                                 IsValid = new Regex(reader["IsValid"]);
@@ -190,10 +220,19 @@ namespace SS
                                 break;
                             case "cell":
                                 SetContentsOfCell(reader["name"], reader["contents"]);
+                            
                                 break;
                         }
                     }
-                }          
+                }
+            
+            foreach(string cell in GetNamesOfAllNonemptyCells())
+            {
+                if (cellNames[cell].Value is FormulaError)
+                {
+                    throw new SpreadsheetReadException("Formula Error ");
+                }
+            }
         }
 
         // ADDED FOR PS6
@@ -294,11 +333,11 @@ namespace SS
         /// </summary>
         public override void Save(TextWriter dest)
         {
-            try {
+            
                 using (XmlWriter writer = XmlWriter.Create(dest))
                 {
                     writer.WriteStartDocument();
-                    writer.WriteStartElement("Spreadsheet");
+                    writer.WriteStartElement("spreadsheet");
                     writer.WriteAttributeString("IsValid", IsValid.ToString());
 
                     foreach (string cellName in GetNamesOfAllNonemptyCells())
@@ -319,12 +358,7 @@ namespace SS
                     writer.WriteEndElement();
                     writer.WriteEndDocument();
                 }
-            }
-
-            catch
-            {
-                throw new IOException();
-            }
+            
             Changed = false;
         }
 
@@ -499,6 +533,7 @@ namespace SS
             {
                 result = SetCellContents(name, content);
             }
+
             foreach (string recalc in result)
             {
                 cellNames[recalc].changeValues(cellNames);
@@ -564,6 +599,7 @@ namespace SS
 
         private static void ValidationCallback(object sender, ValidationEventArgs e)
         {
+            throw new SpreadsheetReadException("Error Reading Spreadsheet");
             Console.WriteLine(" *** Validation Error: {0}", e.Message);
         }
     }
