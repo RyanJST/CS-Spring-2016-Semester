@@ -206,6 +206,7 @@ namespace SS
             cellNames = new Dictionary<string, Cell>();
             graph = new DependencyGraph();
             change = false;
+            try {
                 using (XmlReader reader = XmlReader.Create(source, settings))
                 {
                     while (reader.Read())
@@ -213,19 +214,23 @@ namespace SS
                         switch (reader.Name)
                         {
                             case "spreadsheet":
-                            if (reader.NodeType != XmlNodeType.EndElement)
-                            {
-                                IsValid = new Regex(reader["IsValid"]);
-                            }
+                                if (reader.NodeType != XmlNodeType.EndElement)
+                                {
+                                    IsValid = new Regex(reader["IsValid"]);
+                                }
                                 break;
                             case "cell":
                                 SetContentsOfCell(reader["name"], reader["contents"]);
-                            
+
                                 break;
                         }
                     }
                 }
-            
+            }
+            catch(Exception e)
+            {
+                throw new IOException();
+            }
             foreach(string cell in GetNamesOfAllNonemptyCells())
             {
                 if (cellNames[cell].Value is FormulaError)
@@ -333,7 +338,7 @@ namespace SS
         /// </summary>
         public override void Save(TextWriter dest)
         {
-            
+            try {
                 using (XmlWriter writer = XmlWriter.Create(dest))
                 {
                     writer.WriteStartDocument();
@@ -358,8 +363,13 @@ namespace SS
                     writer.WriteEndElement();
                     writer.WriteEndDocument();
                 }
-            
-            Changed = false;
+
+                Changed = false;
+            }
+            catch
+            {
+                throw new IOException();
+            }
         }
 
         /// <summary>
