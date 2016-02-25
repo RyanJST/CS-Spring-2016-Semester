@@ -157,6 +157,17 @@ namespace PS6_personal_Tests
 
         [TestMethod()]
         [ExpectedException(typeof(CircularException))]
+        public void Test15a()
+        {
+            AbstractSpreadsheet s = new Spreadsheet();
+            s.SetContentsOfCell("A1", "=A2+A3");
+            s.SetContentsOfCell("A3", "=A4+A5");
+            s.SetContentsOfCell("A5", "=A6+A7");
+            s.SetContentsOfCell("A7", "=A1+A1");
+        }
+
+        [TestMethod()]
+        [ExpectedException(typeof(CircularException))]
         public void Test16()
         {
             AbstractSpreadsheet s = new Spreadsheet();

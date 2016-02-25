@@ -220,7 +220,15 @@ namespace SS
                                 }
                                 break;
                             case "cell":
-                                SetContentsOfCell(reader["name"], reader["contents"]);
+                                if (cellNames.ContainsKey(reader["name"]))
+                                {
+                                    if (cellNames[reader["name"]].Content is string && cellNames[reader["name"]].Content != "")
+                                    {
+                                        throw new SpreadsheetReadException("");
+                                    }
+                                    
+                                }
+                                    SetContentsOfCell(reader["name"], reader["contents"]);
 
                                 break;
                         }
@@ -229,6 +237,14 @@ namespace SS
             }
             catch(Exception e)
             {
+                if(e is InvalidNameException)
+                {
+                    throw new SpreadsheetReadException("Invalid name detected");
+                }
+                else if(e is SpreadsheetReadException)
+                {
+                    throw new SpreadsheetReadException("Duplicate Cell Names");
+                }
                 throw new IOException();
             }
             foreach(string cell in GetNamesOfAllNonemptyCells())
