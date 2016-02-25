@@ -600,7 +600,6 @@ namespace SS
         private static void ValidationCallback(object sender, ValidationEventArgs e)
         {
             throw new SpreadsheetReadException("Error Reading Spreadsheet");
-            Console.WriteLine(" *** Validation Error: {0}", e.Message);
         }
     }
 }
