@@ -55,7 +55,7 @@ namespace SS
         /// <summary>
         /// Recalculates the value of the current cell
         /// </summary>
-        /// <param name="lookup"></param>
+        /// <param name="lookup">dictionary of the cells and their values</param>
         public void changeValues(Dictionary<string, Cell> lookup)
         {
             if(contents is Formula)
@@ -90,15 +90,20 @@ namespace SS
         /// <summary>
         /// Looks up the value of other cells when needed.
         /// </summary>
-        /// <param name="cellTable"></param>
-        /// <param name="name"></param>
+        /// <param name="cellTable">Dictionary that looks for cells</param>
+        /// <param name="name">name of the current cell trying to find the value of</param>
         /// <returns></returns>
         private double lookupMethod(Dictionary<string, Cell> cellTable, string name)
         {
+            if (!cellTable.ContainsKey(name))
+            {
+                throw new UndefinedVariableException(name);
+            }
             if(!(cellTable[name].values is double) && !(cellTable[name].values is Formula))
             {
                 throw new UndefinedVariableException(name);
             }
+
 
             return (double)cellTable[name].values;
         }
@@ -160,10 +165,21 @@ namespace SS
         /// </summary>
         private DependencyGraph graph;
 
+        /// <summary>
+        /// Regex that checks in addition to the name validation.  Normally approves all strings,
+        /// but can be changed to only allow certain ones.
+        /// </summary>
         private Regex IsValid;
 
+        /// <summary>
+        /// Regex that does name validation for cell names.  Only allows names that:
+        /// 1. start with a letter, 2. has a 1-9 digit after the letter, 3. is only numbers after the letter
+        /// </summary>
         private Regex nameValid;
 
+        /// <summary>
+        /// bool that checks to see if the spreadsheet has been changed since being created or saved.
+        /// </summary>
         private bool change;
 
         /// <summary>
@@ -191,6 +207,12 @@ namespace SS
             change = false;
         }
 
+        /// <summary>
+        /// Loads up a new spreadsheet that is based on a previously save spreadsheet.
+        /// The input is an XML file that has to pass the spreadsheet.xsd schema in order to be loaded
+        /// If it doe, then the new spreadsheet is filled with the contents and values from the old spreadsheet.
+        /// </summary>
+        /// <param name="source">Location of original spreadsheet.</param>
         public Spreadsheet(TextReader source)
         {
             XmlSchemaSet sc = new XmlSchemaSet();
@@ -222,11 +244,7 @@ namespace SS
                             case "cell":
                                 if (cellNames.ContainsKey(reader["name"]))
                                 {
-                                    if (cellNames[reader["name"]].Content is string && cellNames[reader["name"]].Content != "")
-                                    {
-                                        throw new SpreadsheetReadException("");
-                                    }
-                                    
+                                    throw new SpreadsheetReadException("");
                                 }
                                     SetContentsOfCell(reader["name"], reader["contents"]);
 
@@ -245,7 +263,6 @@ namespace SS
                 {
                     throw new SpreadsheetReadException("Duplicate Cell Names");
                 }
-                throw new IOException();
             }
             foreach(string cell in GetNamesOfAllNonemptyCells())
             {
@@ -354,7 +371,6 @@ namespace SS
         /// </summary>
         public override void Save(TextWriter dest)
         {
-            try {
                 using (XmlWriter writer = XmlWriter.Create(dest))
                 {
                     writer.WriteStartDocument();
@@ -381,11 +397,6 @@ namespace SS
                 }
 
                 Changed = false;
-            }
-            catch
-            {
-                throw new IOException();
-            }
         }
 
         /// <summary>
@@ -410,13 +421,7 @@ namespace SS
             {
                 cellNames.Add(name, new Cell());
             }
-            foreach(string variable in formula.GetVariables())
-            {
-                    if (!cellNames.ContainsKey(variable))
-                    {
-                        cellNames.Add(variable, new Cell());
-                    }
-            }
+
             graph.ReplaceDependees(name, formula.GetVariables());
             ISet<string> result = new HashSet<string>(GetCellsToRecalculate(name));
             
@@ -442,21 +447,13 @@ namespace SS
             {
                 cellNames.Add(name, new Cell());
             }
-
-            if (cellNames[name].Content is Formula)
+            List<string> parents = new List<string>(graph.GetDependees(name));
+            foreach (string parent in parents)
             {
-                Formula form = (Formula)(cellNames[name].Content);
-                foreach (string variable in form.GetVariables())
-                {
-                    if (NameValidation(variable))
-                    {
-                        graph.RemoveDependency(variable.ToUpper(), name);
-                    }
-                }
+                graph.RemoveDependency(parent, name);
             }
 
             cellNames[name].Content = text;
-
             
             return new HashSet<String>(GetCellsToRecalculate(name));
             
@@ -480,18 +477,11 @@ namespace SS
                 cellNames.Add(name, new Cell());
             }
 
-            if (cellNames[name].Content is Formula)
+            List<string> parents = new List<string>(graph.GetDependees(name));
+            foreach (string parent in parents)
             {
-                Formula form = (Formula)(cellNames[name].Content);
-                foreach (string variable in form.GetVariables())
-                {
-                    if (NameValidation(variable))
-                    {
-                        graph.RemoveDependency(variable.ToUpper(), name);
-                    }
-                }
+                graph.RemoveDependency(parent, name);
             }
-
             cellNames[name].Content = number;
 
             return new HashSet<string>(GetCellsToRecalculate(name));
@@ -623,6 +613,12 @@ namespace SS
             return true;
         }
 
+        /// <summary>
+        /// private function to handle when validation fails for the spreadsheet(textreader source) 
+        /// constructor.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private static void ValidationCallback(object sender, ValidationEventArgs e)
         {
             throw new SpreadsheetReadException("Error Reading Spreadsheet");
