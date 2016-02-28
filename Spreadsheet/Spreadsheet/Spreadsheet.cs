@@ -66,17 +66,23 @@ namespace SS
                 }
                 catch (Exception e)
                 {
-                    if (e is CircularException)
-                    {
-                        values = new FormulaError("Created Circular Dependency");
-                    }
-                    else if(e is FormulaFormatException)
-                    {
-                        values = new FormulaError("Incorrect formatting of formula.");
-                    }
-                    else if (e is FormulaEvaluationException)
+                    //if (e is CircularException)
+                    //{
+                    //    values = new FormulaError("Created Circular Dependency");
+                    //}
+                    //else if(e is FormulaFormatException)
+                    //{
+
+                    //    //values = new FormulaError("Incorrect formatting of formula.");
+                    //}
+                    if (e is FormulaEvaluationException)
                     {
                         values = new FormulaError("Error evaluting formula");
+                    }
+
+                    else
+                    {
+                        throw e;
                     }
                 }
             }
@@ -99,7 +105,7 @@ namespace SS
             {
                 throw new UndefinedVariableException(name);
             }
-            if(!(cellTable[name].values is double) && !(cellTable[name].values is Formula))
+            if(!(cellTable[name].values is double))
             {
                 throw new UndefinedVariableException(name);
             }
@@ -542,7 +548,7 @@ namespace SS
             {
                 string edited = content.Remove(0,1);
                 
-                result = SetCellContents(name, new Formula(edited, s => s.ToUpper(), s => nameValid.IsMatch(s)));
+                result = SetCellContents(name, new Formula(edited, s => s.ToUpper(), s => NameValidation(s)));
             }
 
             else
