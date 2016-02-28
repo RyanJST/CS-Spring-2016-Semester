@@ -46,6 +46,10 @@ namespace SpreadsheetGUI
 
         private void HandleClose()
         {
+            if (sheet.Changed)
+            {
+
+            }
             window.DoClose();
         }
 
