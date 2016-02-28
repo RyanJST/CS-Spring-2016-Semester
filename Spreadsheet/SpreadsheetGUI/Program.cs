@@ -1,14 +1,12 @@
-﻿using SSGui;
-using System;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
-
-namespace SS
+namespace SpreadsheetGUI
 {
-    /// <summary>
-    /// Runs a demo involving a SpreadsheetPanel
-    /// </summary>
-    static class Launch
+    static class Program
     {
         /// <summary>
         /// The main entry point for the application.
@@ -18,7 +16,7 @@ namespace SS
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new SpreadsheetDemo());
+            Application.Run(new Form1());
         }
     }
 }
