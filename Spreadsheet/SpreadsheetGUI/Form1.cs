@@ -29,6 +29,35 @@ namespace SpreadsheetGUI
             }
         }
 
+        public string cellNameMainBox
+        {
+            set
+            {
+                cellNameBox.Text = value;
+            }
+        }
+
+        public string cellValueMainBox
+        {
+            set
+            {
+                CellValueBox.Text = value;
+            }
+        }
+
+        public string cellContentsMainBox
+        {
+            set
+            {
+                cellContentsBox.Text = value;
+            }
+
+            get
+            {
+                return cellContentsBox.Text;
+            }
+        }
+
         public Form1()
         {
             InitializeComponent();
@@ -52,7 +81,7 @@ namespace SpreadsheetGUI
 
         public void OpenNew()
         {
-            throw new NotImplementedException();
+            SpreadSheetApplicationContext.GetContext().RunNew();
         }
 
         private void openItem_Click_1(object sender, EventArgs e)

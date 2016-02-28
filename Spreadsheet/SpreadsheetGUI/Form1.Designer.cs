@@ -36,9 +36,9 @@
             this.openItem = new System.Windows.Forms.ToolStripMenuItem();
             this.closeItem = new System.Windows.Forms.ToolStripMenuItem();
             this.fileDialog = new System.Windows.Forms.OpenFileDialog();
-            this.textBox1 = new System.Windows.Forms.TextBox();
-            this.textBox2 = new System.Windows.Forms.TextBox();
-            this.textBox3 = new System.Windows.Forms.TextBox();
+            this.cellNameBox = new System.Windows.Forms.TextBox();
+            this.CellValueBox = new System.Windows.Forms.TextBox();
+            this.cellContentsBox = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
@@ -108,26 +108,28 @@
             this.fileDialog.FileName = "openFileDialog2";
             this.fileDialog.Filter = ".ss files |*.ss| All Files|*.*";
             // 
-            // textBox1
+            // cellNameBox
             // 
-            this.textBox1.Location = new System.Drawing.Point(269, 4);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(85, 20);
-            this.textBox1.TabIndex = 2;
+            this.cellNameBox.Location = new System.Drawing.Point(269, 4);
+            this.cellNameBox.Name = "cellNameBox";
+            this.cellNameBox.ReadOnly = true;
+            this.cellNameBox.Size = new System.Drawing.Size(85, 20);
+            this.cellNameBox.TabIndex = 2;
             // 
-            // textBox2
+            // CellValueBox
             // 
-            this.textBox2.Location = new System.Drawing.Point(429, 4);
-            this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(83, 20);
-            this.textBox2.TabIndex = 3;
+            this.CellValueBox.Location = new System.Drawing.Point(429, 4);
+            this.CellValueBox.Name = "CellValueBox";
+            this.CellValueBox.ReadOnly = true;
+            this.CellValueBox.Size = new System.Drawing.Size(83, 20);
+            this.CellValueBox.TabIndex = 3;
             // 
-            // textBox3
+            // cellContentsBox
             // 
-            this.textBox3.Location = new System.Drawing.Point(589, 4);
-            this.textBox3.Name = "textBox3";
-            this.textBox3.Size = new System.Drawing.Size(83, 20);
-            this.textBox3.TabIndex = 4;
+            this.cellContentsBox.Location = new System.Drawing.Point(589, 4);
+            this.cellContentsBox.Name = "cellContentsBox";
+            this.cellContentsBox.Size = new System.Drawing.Size(83, 20);
+            this.cellContentsBox.TabIndex = 4;
             // 
             // label1
             // 
@@ -168,9 +170,9 @@
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.textBox3);
-            this.Controls.Add(this.textBox2);
-            this.Controls.Add(this.textBox1);
+            this.Controls.Add(this.cellContentsBox);
+            this.Controls.Add(this.CellValueBox);
+            this.Controls.Add(this.cellNameBox);
             this.Controls.Add(this.spreadsheetPanel1);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
@@ -196,9 +198,9 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.TextBox textBox3;
-        private System.Windows.Forms.TextBox textBox2;
-        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TextBox cellContentsBox;
+        private System.Windows.Forms.TextBox CellValueBox;
+        private System.Windows.Forms.TextBox cellNameBox;
         private System.Windows.Forms.ToolStripMenuItem saveToolStripMenuItem;
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
     }

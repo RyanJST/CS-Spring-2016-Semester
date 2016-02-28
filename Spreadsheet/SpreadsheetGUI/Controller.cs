@@ -28,12 +28,20 @@ namespace SpreadsheetGUI
 
         private void HandleSave(string obj)
         {
-            throw new NotImplementedException();
+            try {
+                TextWriter write = File.CreateText(obj);
+                sheet.Save(write);
+            }
+
+            catch(Exception e)
+            {
+                window.Message = "Unable to save file \n" + e.Message;
+            }
         }
 
         private void HandleNew()
         {
-            sheet = new Spreadsheet();
+            window.OpenNew();
         }
 
         private void HandleClose()
@@ -47,6 +55,10 @@ namespace SpreadsheetGUI
             {
                 TextReader reader = File.OpenText(obj);
                 sheet = new Spreadsheet(reader);
+                foreach(string cellName in sheet.GetNamesOfAllNonemptyCells())
+                {
+
+                }
                 window.Title = obj;
             }
             catch(Exception e)

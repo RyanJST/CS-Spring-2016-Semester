@@ -19,5 +19,13 @@ namespace SpreadsheetGUI
         void OpenNew();
 
         string Message { set; }
+
+        string cellNameMainBox { set; }
+
+        string cellValueMainBox { set; }
+
+        string cellContentsMainBox { set; }
+
+
     }
 }
