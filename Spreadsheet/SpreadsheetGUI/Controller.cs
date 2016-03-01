@@ -87,9 +87,16 @@ namespace SpreadsheetGUI
                 sheet = new Spreadsheet(reader);
                 foreach(string cellName in sheet.GetNamesOfAllNonemptyCells())
                 {
-
+                    char letter = cellName[0];
+                    int letNum = letter - 97;
+                    int numRow;
+                    if(int.TryParse(cellName.Substring(1), out numRow))
+                    {
+                        window.updateTable(sheet.GetCellValue(cellName).ToString(), letNum, numRow - 1);
+                    }
                 }
                 window.Title = obj;
+              
             }
             catch(Exception e)
             {

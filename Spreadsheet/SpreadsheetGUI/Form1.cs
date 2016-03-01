@@ -178,6 +178,7 @@ namespace SpreadsheetGUI
         public void updateTable(string obj, int col, int row)
         {
             spreadsheetPanel1.SetValue(col, row, obj);
+         
         }
     }
 }
