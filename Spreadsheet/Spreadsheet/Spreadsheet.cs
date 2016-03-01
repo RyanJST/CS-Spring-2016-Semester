@@ -252,6 +252,7 @@ namespace SS
                                 {
                                     throw new SpreadsheetReadException("");
                                 }
+                                    
                                     SetContentsOfCell(reader["name"], reader["contents"]);
 
                                 break;
@@ -389,7 +390,7 @@ namespace SS
                         writer.WriteAttributeString("name", cellName);
                         if (cellNames[cellName].Content is Formula)
                         {
-                            writer.WriteAttributeString("contents", "=" + cellNames[cellName].Content.ToString());
+                            writer.WriteAttributeString("contents", "= " + cellNames[cellName].Content.ToString());
                         }
                         else
                         {

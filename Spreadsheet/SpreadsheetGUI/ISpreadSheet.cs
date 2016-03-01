@@ -16,7 +16,7 @@ namespace SpreadsheetGUI
 
         event Action<int, int> ChangeSelection;
 
-        string Title { set; }
+        string Title { set; get; }
 
         void DoClose();
 
@@ -24,7 +24,7 @@ namespace SpreadsheetGUI
 
         string Message { set; }
 
-        bool MessageYesNo { get; }
+        string MessageYesNo { set; }
 
         string cellNameMainBox { set; }
 

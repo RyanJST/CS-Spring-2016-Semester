@@ -20,6 +20,7 @@ namespace SpreadsheetGUI
         {
             this.window = window;
             sheet = new Spreadsheet();
+            window.Title = "Spreadsheet";
             window.FileChosenEvent += HandleFileChosen;
             window.CloseEvent += HandleClose;
             window.NewEvent += HandleNew;
@@ -32,13 +33,20 @@ namespace SpreadsheetGUI
         {
             char letter = (char)(97 + col);
             string cellName = letter.ToString().ToUpper() + (row + 1).ToString();
-            string cellName2 = letter.ToString().ToUpper() + (row).ToString();
-            window.cellNameMainBox = cellName2;
+            
+            window.cellNameMainBox = cellName;
 
             window.cellValueMainBox = sheet.GetCellValue(cellName).ToString();
 
-            window.cellContentsMainBox = sheet.GetCellContents(cellName).ToString();
-            
+            if (!(sheet.GetCellContents(cellName) is string) && !(sheet.GetCellContents(cellName) is double) && !(sheet.GetCellContents(cellName) is FormulaError))
+            {
+                window.cellContentsMainBox = "= " + sheet.GetCellContents(cellName).ToString();
+            }
+            else
+            {
+                window.cellContentsMainBox = sheet.GetCellContents(cellName).ToString();
+            }
+
         }
 
         private void HandleChangeContents(string obj, int col, int row)
@@ -46,11 +54,28 @@ namespace SpreadsheetGUI
             char letter = (char)(97 + col);
             string cellName = letter.ToString().ToUpper() + (row + 1).ToString();
             string cellName2 = letter.ToString().ToUpper() + (row).ToString();
-
-            sheet.SetContentsOfCell(cellName, obj);
-            window.updateTable(sheet.GetCellValue(cellName).ToString(), col, row);
-            
+            foreach (string cell in sheet.SetContentsOfCell(cellName, obj))
+            {
+                char letter2 = cell[0];
+                int letNum = letter2 - 65;
+                int numRow;
+                if (int.TryParse(cell.Substring(1), out numRow))
+                {
+                    window.updateTable(sheet.GetCellValue(cell).ToString(), letNum, numRow - 1);
+                }
+                
+            }
+            if (!(sheet.GetCellContents(cellName) is string) && char.IsLetter(sheet.GetCellContents(cellName).ToString()[0]))
+            {
+                window.cellValueMainBox = "= " + sheet.GetCellValue(cellName).ToString();
+            }
+            else
+            {
+                window.cellValueMainBox = sheet.GetCellValue(cellName).ToString();
+            }
         }
+            
+        
 
         private void HandleSave(string obj)
         {
@@ -74,7 +99,7 @@ namespace SpreadsheetGUI
         {
             if (sheet.Changed)
             {
-                
+                window.MessageYesNo = window.Title;
             }
             window.DoClose();
         }
@@ -88,11 +113,13 @@ namespace SpreadsheetGUI
                 foreach(string cellName in sheet.GetNamesOfAllNonemptyCells())
                 {
                     char letter = cellName[0];
-                    int letNum = letter - 97;
+                    int letNum = letter - 65;
                     int numRow;
                     if(int.TryParse(cellName.Substring(1), out numRow))
                     {
-                        window.updateTable(sheet.GetCellValue(cellName).ToString(), letNum, numRow - 1);
+                        
+                            window.updateTable(sheet.GetCellValue(cellName).ToString(), letNum, numRow - 1);
+                        
                     }
                 }
                 window.Title = obj;

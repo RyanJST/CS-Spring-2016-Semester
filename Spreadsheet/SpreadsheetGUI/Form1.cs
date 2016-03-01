@@ -22,6 +22,11 @@ namespace SpreadsheetGUI
             {
                 Text = value; 
             }
+
+            get
+            {
+                return Text;
+            }
         }
 
         
@@ -33,17 +38,23 @@ namespace SpreadsheetGUI
             }
         }
 
-        public bool MessageYesNo
+        public string MessageYesNo
         {
-            get
+            set
             {
-               
-                if(MessageBox.Show("Current file", "File is unsaved.  Do you wish to save it?", MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
+                if (MessageBox.Show("Do you want to save the current file?", value, MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
-                    return true;
+                    DialogResult result = saveFileDialog1.ShowDialog();
+                    if (result == DialogResult.Yes || result == DialogResult.OK)
+                    {
+                        if (SaveEvent != null)
+                        {
+                            SaveEvent(saveFileDialog1.FileName);
+                        }
+                    }
                 }
-                return false;
             }
+            
         }
 
         public string cellNameMainBox
@@ -79,6 +90,7 @@ namespace SpreadsheetGUI
         {
             InitializeComponent();
             spreadsheetPanel1.SelectionChanged += displaySelection;
+
         }
 
         
@@ -92,7 +104,10 @@ namespace SpreadsheetGUI
 
         private void Form1_Load(object sender, EventArgs e)
         {
-
+            if (ChangeSelection != null)
+            {
+                ChangeSelection(0, 0);
+            }
         }
 
         public void DoClose()
@@ -115,6 +130,10 @@ namespace SpreadsheetGUI
                 {
                     FileChosenEvent(fileDialog.FileName);
                 }
+            }
+            if (ChangeSelection != null)
+            {
+                ChangeSelection(0, 0);
             }
         }
 
@@ -146,6 +165,7 @@ namespace SpreadsheetGUI
             }
         }
 
+
         private void cellContentsBox_TextChanged(object sender, KeyEventArgs e)
         {
             int column;
@@ -165,9 +185,8 @@ namespace SpreadsheetGUI
         private void displaySelection(SpreadsheetPanel ss)
         {
             int row, col;
-            String value;
             ss.GetSelection(out col, out row);
-            ss.GetValue(col, row, out value);
+            
 
             if(ChangeSelection != null)
             {
@@ -178,7 +197,6 @@ namespace SpreadsheetGUI
         public void updateTable(string obj, int col, int row)
         {
             spreadsheetPanel1.SetValue(col, row, obj);
-         
         }
     }
 }
