@@ -53,6 +53,7 @@
             this.spreadsheetPanel1.Name = "spreadsheetPanel1";
             this.spreadsheetPanel1.Size = new System.Drawing.Size(975, 589);
             this.spreadsheetPanel1.TabIndex = 0;
+            
             // 
             // menuStrip1
             // 
@@ -78,34 +79,34 @@
             // newItem
             // 
             this.newItem.Name = "newItem";
-            this.newItem.Size = new System.Drawing.Size(152, 22);
+            this.newItem.Size = new System.Drawing.Size(112, 22);
             this.newItem.Text = "New";
             this.newItem.Click += new System.EventHandler(this.newItem_Click_1);
             // 
             // saveToolStripMenuItem
             // 
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(112, 22);
             this.saveToolStripMenuItem.Text = "Save";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
             // openItem
             // 
             this.openItem.Name = "openItem";
-            this.openItem.Size = new System.Drawing.Size(152, 22);
+            this.openItem.Size = new System.Drawing.Size(112, 22);
             this.openItem.Text = "Open...";
             this.openItem.Click += new System.EventHandler(this.openItem_Click_1);
             // 
             // closeItem
             // 
             this.closeItem.Name = "closeItem";
-            this.closeItem.Size = new System.Drawing.Size(152, 22);
+            this.closeItem.Size = new System.Drawing.Size(112, 22);
             this.closeItem.Text = "Close";
             this.closeItem.Click += new System.EventHandler(this.closeItem_Click_1);
             // 
             // fileDialog
             // 
-            this.fileDialog.FileName = "openFileDialog2";
+            this.fileDialog.DefaultExt = "ss";
             this.fileDialog.Filter = ".ss files |*.ss| All Files|*.*";
             // 
             // cellNameBox
@@ -130,6 +131,8 @@
             this.cellContentsBox.Name = "cellContentsBox";
             this.cellContentsBox.Size = new System.Drawing.Size(83, 20);
             this.cellContentsBox.TabIndex = 4;
+           
+            this.cellContentsBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.cellContentsBox_TextChanged);
             // 
             // label1
             // 
@@ -160,7 +163,8 @@
             // 
             // saveFileDialog1
             // 
-            this.saveFileDialog1.Filter = ".ss Files| *.ss | All Files| *.*";
+            this.saveFileDialog1.DefaultExt = "ss";
+            this.saveFileDialog1.Filter = ".ss Files|*.ss| All Files| *.*";
             // 
             // Form1
             // 
@@ -187,8 +191,6 @@
         }
 
         #endregion
-
-        private SSGui.SpreadsheetPanel spreadsheetPanel1;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem fileMenu;
         private System.Windows.Forms.ToolStripMenuItem newItem;
@@ -203,6 +205,7 @@
         private System.Windows.Forms.TextBox cellNameBox;
         private System.Windows.Forms.ToolStripMenuItem saveToolStripMenuItem;
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
+        private SSGui.SpreadsheetPanel spreadsheetPanel1;
     }
 }
 

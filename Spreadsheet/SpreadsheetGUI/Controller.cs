@@ -19,11 +19,37 @@ namespace SpreadsheetGUI
         public Controller(ISpreadSheet window)
         {
             this.window = window;
+            sheet = new Spreadsheet();
             window.FileChosenEvent += HandleFileChosen;
             window.CloseEvent += HandleClose;
             window.NewEvent += HandleNew;
             window.SaveEvent += HandleSave;
+            window.ChangeContents += HandleChangeContents;
+            window.ChangeSelection += HandleChangeSelection;
+        }
 
+        private void HandleChangeSelection(int col, int row)
+        {
+            char letter = (char)(97 + col);
+            string cellName = letter.ToString().ToUpper() + (row + 1).ToString();
+            string cellName2 = letter.ToString().ToUpper() + (row).ToString();
+            window.cellNameMainBox = cellName2;
+
+            window.cellValueMainBox = sheet.GetCellValue(cellName).ToString();
+
+            window.cellContentsMainBox = sheet.GetCellContents(cellName).ToString();
+            
+        }
+
+        private void HandleChangeContents(string obj, int col, int row)
+        {
+            char letter = (char)(97 + col);
+            string cellName = letter.ToString().ToUpper() + (row + 1).ToString();
+            string cellName2 = letter.ToString().ToUpper() + (row).ToString();
+
+            sheet.SetContentsOfCell(cellName, obj);
+            window.updateTable(sheet.GetCellValue(cellName).ToString(), col, row);
+            
         }
 
         private void HandleSave(string obj)
@@ -48,7 +74,7 @@ namespace SpreadsheetGUI
         {
             if (sheet.Changed)
             {
-
+                
             }
             window.DoClose();
         }

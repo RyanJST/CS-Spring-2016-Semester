@@ -1,4 +1,5 @@
 ﻿using System;
+using SSGui;
 using System.IO;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -13,6 +14,8 @@ namespace SpreadsheetGUI
 {
     public partial class Form1 : Form, ISpreadSheet
     {
+        
+        
         public string Title
         {
             set
@@ -21,11 +24,25 @@ namespace SpreadsheetGUI
             }
         }
 
+        
         public string Message
         {
             set
             {
                 MessageBox.Show(value);
+            }
+        }
+
+        public bool MessageYesNo
+        {
+            get
+            {
+               
+                if(MessageBox.Show("Current file", "File is unsaved.  Do you wish to save it?", MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
+                {
+                    return true;
+                }
+                return false;
             }
         }
 
@@ -61,12 +78,17 @@ namespace SpreadsheetGUI
         public Form1()
         {
             InitializeComponent();
+            spreadsheetPanel1.SelectionChanged += displaySelection;
         }
+
+        
 
         public event Action<string> FileChosenEvent;
         public event Action CloseEvent;
         public event Action NewEvent;
         public event Action<string> SaveEvent;
+        public event Action<string, int, int> ChangeContents;
+        public event Action<int, int> ChangeSelection;
 
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -119,9 +141,43 @@ namespace SpreadsheetGUI
             {
                 if (SaveEvent != null)
                 {
-                    SaveEvent(fileDialog.FileName);
+                    SaveEvent(saveFileDialog1.FileName);
                 }
             }
+        }
+
+        private void cellContentsBox_TextChanged(object sender, KeyEventArgs e)
+        {
+            int column;
+            int row;
+
+
+            if (e.KeyCode == Keys.Enter)
+            {
+                if (ChangeContents != null)
+                {
+                    spreadsheetPanel1.GetSelection(out column, out row);
+                    ChangeContents(cellContentsBox.Text, column, row);
+                }
+            }
+        }
+
+        private void displaySelection(SpreadsheetPanel ss)
+        {
+            int row, col;
+            String value;
+            ss.GetSelection(out col, out row);
+            ss.GetValue(col, row, out value);
+
+            if(ChangeSelection != null)
+            {
+                ChangeSelection(col, row);
+            }
+        }
+
+        public void updateTable(string obj, int col, int row)
+        {
+            spreadsheetPanel1.SetValue(col, row, obj);
         }
     }
 }
