@@ -9,13 +9,27 @@ using System.Threading.Tasks;
 
 namespace SpreadsheetGUI
 {
+    /// <summary>
+    /// Class that controls the interactions between the Model(spreadsheet) and the view(Form).  Stores a window of a ISpreadsheet type,
+    /// and a spreadsheet of AbstractSpreadsheet.
+    /// </summary>
     public class Controller
     {
-
+        /// <summary>
+        /// Window of ISpreadsheet type.  Allows the controller to hook into the view through absract methods and set the UI to the correct responses.
+        /// </summary>
         private ISpreadSheet window;
 
+        /// <summary>
+        /// Spreadsheet of AbstractSpreadsheet type.  Stores the data of the spreadsheet and allows manipulation of that data.
+        /// </summary>
         private AbstractSpreadsheet sheet;
 
+        /// <summary>
+        /// Creates a controller to a window and a blank spreadsheet.  Uses a regex for the spreadsheet to ensure that the cell names do not go beyond
+        /// A1-Z99.  Creates event handlers for the window that trigger methods in this class.
+        /// </summary>
+        /// <param name="window">window to be paired to the controller.</param>
         public Controller(ISpreadSheet window)
         {
             this.window = window;
@@ -30,7 +44,12 @@ namespace SpreadsheetGUI
             
         }
 
-
+        /// <summary>
+        /// This version of the controller sets up a new window and controller that has the spreadsheet build from the old spreadsheet into the new one.
+        /// Calls CreateSheet to populate the view with all the data of the new spreadsheet.
+        /// </summary>
+        /// <param name="window">Window that is paired with the controller</param>
+        /// <param name="dest">String of the filepath of the saved file to open</param>
         public Controller(ISpreadSheet window, string dest)
         {
             this.window = window;
@@ -39,20 +58,28 @@ namespace SpreadsheetGUI
                 {
                     sheet = new Spreadsheet(reader);
                 }
+                window.Title = dest;
+                window.FileChosenEvent += HandleFileChosen;
+                window.CloseEvent += HandleClose;
+                window.NewEvent += HandleNew;
+                window.SaveEvent += HandleSave;
+                window.ChangeContents += HandleChangeContents;
+                window.ChangeSelection += HandleChangeSelection;
+                createSheet();
             }
             catch(Exception e)
             {
                 window.Message = "Unable to open File." + e.Message;
             }
-            window.Title = dest;
-            window.FileChosenEvent += HandleFileChosen;
-            window.CloseEvent += HandleClose;
-            window.NewEvent += HandleNew;
-            window.SaveEvent += HandleSave;
-            window.ChangeContents += HandleChangeContents;
-            window.ChangeSelection += HandleChangeSelection;
-            createSheet();
+            
         }
+
+        /// <summary>
+        /// Method that happens when the user changes their selection.  Sets up the contents of the cellname box, cellValue box, and cellContents box, 
+        /// to the correct result of the relevant cell.
+        /// </summary>
+        /// <param name="col">Number that correlates to the letter of the cellname</param>
+        /// <param name="row">Number that correlates to the number of the cellname</param>
         private void HandleChangeSelection(int col, int row)
         {
             char letter = (char)(97 + col);
@@ -73,6 +100,13 @@ namespace SpreadsheetGUI
 
         }
 
+        /// <summary>
+        /// This method is called when the ChangeContents event happens.  This event updates the result of the relevant cell in the spreadsheet
+        /// and then updates every cells that depends on it in the GUI and in the spreadsheet.  
+        /// </summary>
+        /// <param name="obj">New cell contents to update the cell with</param>
+        /// <param name="col">Number that correlates to the letter of the cellName</param>
+        /// <param name="row">Number that correlates to the number of the cellName</param>
         private void HandleChangeContents(string obj, int col, int row)
         {
             char letter = (char)(97 + col);
@@ -106,7 +140,11 @@ namespace SpreadsheetGUI
         }
             
         
-
+        /// <summary>
+        /// Method that triggers when the saveevent is triggered.  Saves the contents of the spreadsheet to a .ss file and sets the title of the window
+        /// to the file path of the saved file.
+        /// </summary>
+        /// <param name="obj">string of the file path to save to</param>
         private void HandleSave(string obj)
         {
             try {
@@ -122,11 +160,18 @@ namespace SpreadsheetGUI
             }
         }
 
+        /// <summary>
+        /// Method that triggers when the new event is triggered.  Asks the window to open up a new window.
+        /// </summary>
         private void HandleNew()
         {
             window.OpenNew();
         }
 
+        /// <summary>
+        /// Method that is trigged when the closeEvent is triggered.  If the spreadsheet have been changed and not saved, it calls the window method
+        /// that asks if the user wants to save.  Then it closes the window that is paired with the controller.  
+        /// </summary>
         private void HandleClose()
         {
             if (sheet.Changed)
@@ -136,12 +181,20 @@ namespace SpreadsheetGUI
             window.DoClose();
         }
 
+        /// <summary>
+        /// Method that happens when a file is chosen.  It calls the approriate method that opens up a new window with the data from the old spreadsheet.
+        /// </summary>
+        /// <param name="obj">string that has the filepath of the file to open.</param>
         private void HandleFileChosen(string obj)
         {
             window.OpenOldNew(obj);
                     
         }
 
+        /// <summary>
+        /// Method that is called by the constructor that takes the filepath of a file to open.
+        /// Calls the view's updatetable method for every single cell that is not empty and update each one of them.
+        /// </summary>
         private void createSheet()
         {
             try {

@@ -43,6 +43,8 @@
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
+            this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.seeHelpContentsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -57,7 +59,8 @@
             // menuStrip1
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.fileMenu});
+            this.fileMenu,
+            this.helpToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(975, 24);
@@ -78,28 +81,28 @@
             // newItem
             // 
             this.newItem.Name = "newItem";
-            this.newItem.Size = new System.Drawing.Size(112, 22);
+            this.newItem.Size = new System.Drawing.Size(152, 22);
             this.newItem.Text = "New";
             this.newItem.Click += new System.EventHandler(this.newItem_Click_1);
             // 
             // saveToolStripMenuItem
             // 
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(112, 22);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.saveToolStripMenuItem.Text = "Save";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
             // openItem
             // 
             this.openItem.Name = "openItem";
-            this.openItem.Size = new System.Drawing.Size(112, 22);
+            this.openItem.Size = new System.Drawing.Size(152, 22);
             this.openItem.Text = "Open...";
             this.openItem.Click += new System.EventHandler(this.openItem_Click_1);
             // 
             // closeItem
             // 
             this.closeItem.Name = "closeItem";
-            this.closeItem.Size = new System.Drawing.Size(112, 22);
+            this.closeItem.Size = new System.Drawing.Size(152, 22);
             this.closeItem.Text = "Close";
             this.closeItem.Click += new System.EventHandler(this.closeItem_Click_1);
             // 
@@ -166,6 +169,21 @@
             this.saveFileDialog1.OverwritePrompt = false;
             this.saveFileDialog1.Title = "Save File";
             // 
+            // helpToolStripMenuItem
+            // 
+            this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.seeHelpContentsToolStripMenuItem});
+            this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
+            this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+            this.helpToolStripMenuItem.Text = "Help";
+            // 
+            // seeHelpContentsToolStripMenuItem
+            // 
+            this.seeHelpContentsToolStripMenuItem.Name = "seeHelpContentsToolStripMenuItem";
+            this.seeHelpContentsToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
+            this.seeHelpContentsToolStripMenuItem.Text = "See Help Contents";
+            this.seeHelpContentsToolStripMenuItem.Click += new System.EventHandler(this.seeHelpContentsToolStripMenuItem_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -206,6 +224,8 @@
         private System.Windows.Forms.ToolStripMenuItem saveToolStripMenuItem;
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
         private SSGui.SpreadsheetPanel spreadsheetPanel1;
+        private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem seeHelpContentsToolStripMenuItem;
     }
 }
 
