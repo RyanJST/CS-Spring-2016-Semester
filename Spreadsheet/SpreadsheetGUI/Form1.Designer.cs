@@ -53,7 +53,6 @@
             this.spreadsheetPanel1.Name = "spreadsheetPanel1";
             this.spreadsheetPanel1.Size = new System.Drawing.Size(975, 589);
             this.spreadsheetPanel1.TabIndex = 0;
-            
             // 
             // menuStrip1
             // 
@@ -131,7 +130,6 @@
             this.cellContentsBox.Name = "cellContentsBox";
             this.cellContentsBox.Size = new System.Drawing.Size(83, 20);
             this.cellContentsBox.TabIndex = 4;
-           
             this.cellContentsBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.cellContentsBox_TextChanged);
             // 
             // label1
@@ -165,6 +163,8 @@
             // 
             this.saveFileDialog1.DefaultExt = "ss";
             this.saveFileDialog1.Filter = ".ss Files|*.ss| All Files| *.*";
+            this.saveFileDialog1.OverwritePrompt = false;
+            this.saveFileDialog1.Title = "Save File";
             // 
             // Form1
             // 

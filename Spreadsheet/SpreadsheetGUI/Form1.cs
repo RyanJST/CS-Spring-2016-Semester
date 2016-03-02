@@ -121,6 +121,11 @@ namespace SpreadsheetGUI
             SpreadSheetApplicationContext.GetContext().RunNew();
         }
 
+        public void OpenOldNew(string sheet)
+        {
+            SpreadSheetApplicationContext.GetContext().RunNew(sheet);
+        }
+
         private void openItem_Click_1(object sender, EventArgs e)
         {
             DialogResult result = fileDialog.ShowDialog();
@@ -131,10 +136,7 @@ namespace SpreadsheetGUI
                     FileChosenEvent(fileDialog.FileName);
                 }
             }
-            if (ChangeSelection != null)
-            {
-                ChangeSelection(0, 0);
-            }
+       
         }
 
         private void newItem_Click_1(object sender, EventArgs e)
@@ -153,12 +155,24 @@ namespace SpreadsheetGUI
             }
         }
 
+
+
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            SaveFileDialog test = saveFileDialog1;
             DialogResult result = saveFileDialog1.ShowDialog();
+            bool check = true;
+            
             if (result == DialogResult.Yes || result == DialogResult.OK)
             {
-                if (SaveEvent != null)
+                if (saveFileDialog1.FileName != Text && File.Exists(saveFileDialog1.FileName))
+                {
+                    if (MessageBox.Show(saveFileDialog1.FileName + " already exists." + "\n" + "Do you wish to overwrite it?", "CheckFile", MessageBoxButtons.YesNo) != DialogResult.Yes)
+                    {
+                        check = false;
+                    }
+                }
+                if (SaveEvent != null && check)
                 {
                     SaveEvent(saveFileDialog1.FileName);
                 }

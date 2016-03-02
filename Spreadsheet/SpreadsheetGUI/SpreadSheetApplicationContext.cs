@@ -29,14 +29,30 @@ namespace SpreadsheetGUI
 
         public void RunNew()
         {
-            Form1 window = new Form1();
-            new Controller(window);
+          
+                
+                Form1 window = new Form1();
+                new Controller(window);
 
-            windowCount++;
+                windowCount++;
 
-            window.FormClosed += (o, e) => { if (--windowCount <= 0) ExitThread();  };
+                window.FormClosed += (o, e) => { if (--windowCount <= 0) ExitThread(); };
 
-            window.Show();
+                window.Show();
+            
+        }
+
+        public void RunNew(string sheet)
+        {
+                Form1 window = new Form1();
+                new Controller(window, sheet);
+
+                windowCount++;
+
+                window.FormClosed += (o, e) => { if (--windowCount <= 0) ExitThread(); };
+
+                window.Show();
+            }
         }
     }
-}
+

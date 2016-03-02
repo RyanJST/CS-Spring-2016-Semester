@@ -34,6 +34,8 @@ namespace SpreadsheetGUI
 
         void updateTable(string obj, int row, int col);
 
+        void OpenOldNew(string obj);
+
 
     }
 }

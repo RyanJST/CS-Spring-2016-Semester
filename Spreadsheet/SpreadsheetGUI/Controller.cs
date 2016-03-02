@@ -19,7 +19,7 @@ namespace SpreadsheetGUI
         public Controller(ISpreadSheet window)
         {
             this.window = window;
-            sheet = new Spreadsheet();
+            sheet = new Spreadsheet(new System.Text.RegularExpressions.Regex(@"^[A-Z]+[1-9]{1}[0-9]{0,1}$"));
             window.Title = "Spreadsheet";
             window.FileChosenEvent += HandleFileChosen;
             window.CloseEvent += HandleClose;
@@ -27,8 +27,32 @@ namespace SpreadsheetGUI
             window.SaveEvent += HandleSave;
             window.ChangeContents += HandleChangeContents;
             window.ChangeSelection += HandleChangeSelection;
+            
         }
 
+
+        public Controller(ISpreadSheet window, string dest)
+        {
+            this.window = window;
+            try {
+                using (TextReader reader = File.OpenText(dest))
+                {
+                    sheet = new Spreadsheet(reader);
+                }
+            }
+            catch(Exception e)
+            {
+                window.Message = "Unable to open File." + e.Message;
+            }
+            window.Title = dest;
+            window.FileChosenEvent += HandleFileChosen;
+            window.CloseEvent += HandleClose;
+            window.NewEvent += HandleNew;
+            window.SaveEvent += HandleSave;
+            window.ChangeContents += HandleChangeContents;
+            window.ChangeSelection += HandleChangeSelection;
+            createSheet();
+        }
         private void HandleChangeSelection(int col, int row)
         {
             char letter = (char)(97 + col);
@@ -54,16 +78,22 @@ namespace SpreadsheetGUI
             char letter = (char)(97 + col);
             string cellName = letter.ToString().ToUpper() + (row + 1).ToString();
             string cellName2 = letter.ToString().ToUpper() + (row).ToString();
-            foreach (string cell in sheet.SetContentsOfCell(cellName, obj))
-            {
-                char letter2 = cell[0];
-                int letNum = letter2 - 65;
-                int numRow;
-                if (int.TryParse(cell.Substring(1), out numRow))
+            try {
+                foreach (string cell in sheet.SetContentsOfCell(cellName, obj))
                 {
-                    window.updateTable(sheet.GetCellValue(cell).ToString(), letNum, numRow - 1);
+                    char letter2 = cell[0];
+                    int letNum = letter2 - 65;
+                    int numRow;
+                    if (int.TryParse(cell.Substring(1), out numRow))
+                    {
+                        window.updateTable(sheet.GetCellValue(cell).ToString(), letNum, numRow - 1);
+                    }
+
                 }
-                
+            }
+            catch(Exception e)
+            {
+                window.Message = "Unable to do change " + e.Message; 
             }
             if (!(sheet.GetCellContents(cellName) is string) && char.IsLetter(sheet.GetCellContents(cellName).ToString()[0]))
             {
@@ -80,8 +110,10 @@ namespace SpreadsheetGUI
         private void HandleSave(string obj)
         {
             try {
-                TextWriter write = File.CreateText(obj);
-                sheet.Save(write);
+                using(TextWriter write = File.CreateText(obj)){
+                    sheet.Save(write);
+                }
+                window.Title = obj;
             }
 
             catch(Exception e)
@@ -106,29 +138,31 @@ namespace SpreadsheetGUI
 
         private void HandleFileChosen(string obj)
         {
-            try
-            {
-                TextReader reader = File.OpenText(obj);
-                sheet = new Spreadsheet(reader);
-                foreach(string cellName in sheet.GetNamesOfAllNonemptyCells())
+            window.OpenOldNew(obj);
+                    
+        }
+
+        private void createSheet()
+        {
+            try {
+                foreach (string cellName in sheet.GetNamesOfAllNonemptyCells())
                 {
                     char letter = cellName[0];
                     int letNum = letter - 65;
                     int numRow;
-                    if(int.TryParse(cellName.Substring(1), out numRow))
+                    if (int.TryParse(cellName.Substring(1), out numRow))
                     {
-                        
-                            window.updateTable(sheet.GetCellValue(cellName).ToString(), letNum, numRow - 1);
-                        
+
+                        window.updateTable(sheet.GetCellValue(cellName).ToString(), letNum, numRow - 1);
+
                     }
-                }
-                window.Title = obj;
-              
+                } 
+
             }
             catch(Exception e)
             {
                 window.Message = "Unable to open file\n" + e.Message;
             }
-        }
+}
     }
 }
