@@ -129,14 +129,7 @@ namespace SpreadsheetGUI
             {
                 window.Message = "Unable to do change " + e.Message; 
             }
-            if (!(sheet.GetCellContents(cellName) is string) && char.IsLetter(sheet.GetCellContents(cellName).ToString()[0]))
-            {
-                window.cellValueMainBox = "= " + sheet.GetCellValue(cellName).ToString();
-            }
-            else
-            {
                 window.cellValueMainBox = sheet.GetCellValue(cellName).ToString();
-            }
         }
             
         
