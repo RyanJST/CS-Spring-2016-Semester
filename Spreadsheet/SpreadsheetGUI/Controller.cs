@@ -140,16 +140,22 @@ namespace SpreadsheetGUI
         /// <param name="obj">string of the file path to save to</param>
         private void HandleSave(string obj)
         {
-            try {
-                using(TextWriter write = File.CreateText(obj)){
-                    sheet.Save(write);
-                }
-                window.Title = obj;
-            }
-
-            catch(Exception e)
+            if (!File.Exists(obj) || obj == window.Title || window.MessageYesNo("This file already exists, do you wish to overwrite?"))
             {
-                window.Message = "Unable to save file \n" + e.Message;
+                try
+                {
+
+                    using (TextWriter write = File.CreateText(obj))
+                    {
+                        sheet.Save(write);
+                    }
+                    window.Title = obj;
+                }
+
+                catch (Exception e)
+                {
+                    window.Message = "Unable to save file \n" + e.Message;
+                }
             }
         }
 
@@ -169,7 +175,10 @@ namespace SpreadsheetGUI
         {
             if (sheet.Changed)
             {
-                window.MessageYesNo = window.Title;
+                if (window.MessageYesNo("You have unsaved Changes, do you wish to save?"))
+                {
+                    HandleSave(window.Title);
+                }
             }
             window.DoClose();
         }

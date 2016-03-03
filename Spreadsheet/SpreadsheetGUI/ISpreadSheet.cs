@@ -57,7 +57,7 @@ namespace SpreadsheetGUI
         /// <summary>
         /// property that gets a yes or no message for the user.
         /// </summary>
-        string MessageYesNo { set; }
+        bool MessageYesNo(string value);
 
         /// <summary>
         /// Property that sets the text of the cellNamebox

@@ -52,23 +52,14 @@ namespace SpreadsheetGUI
         /// this Property is primarily used to pop up a message box asking if the user wishes to save.  If so, it will call the saveEvent in the 
         /// controller through the event handler SaveEvent
         /// </summary>
-        public string MessageYesNo
+        public bool MessageYesNo(string obj)
         {
-            set
-            {
-                if (MessageBox.Show("Do you want to save the current file?", value, MessageBoxButtons.YesNo) == DialogResult.Yes)
+            if (MessageBox.Show(obj, "Save Current File", MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
-                    DialogResult result = saveFileDialog1.ShowDialog();
-                    if (result == DialogResult.Yes || result == DialogResult.OK)
-                    {
-                        if (SaveEvent != null)
-                        {
-                            SaveEvent(saveFileDialog1.FileName);
-                        }
-                    }
-                }
+                return true;
             }
-            
+                return false;
+
         }
 
         /// <summary>
@@ -246,18 +237,18 @@ namespace SpreadsheetGUI
         {
             SaveFileDialog test = saveFileDialog1;
             DialogResult result = saveFileDialog1.ShowDialog();
-            bool check = true;
+            //bool check = true;
             
             if (result == DialogResult.Yes || result == DialogResult.OK)
             {
-                if (saveFileDialog1.FileName != Text && File.Exists(saveFileDialog1.FileName))
-                {
-                    if (MessageBox.Show(saveFileDialog1.FileName + " already exists." + "\n" + "Do you wish to overwrite it?", "CheckFile", MessageBoxButtons.YesNo) != DialogResult.Yes)
-                    {
-                        check = false;
-                    }
-                }
-                if (SaveEvent != null && check)
+                //if (saveFileDialog1.FileName != Text && File.Exists(saveFileDialog1.FileName))
+                //{
+                //    if (MessageBox.Show(saveFileDialog1.FileName + " already exists." + "\n" + "Do you wish to overwrite it?", "CheckFile", MessageBoxButtons.YesNo) != DialogResult.Yes)
+                //    {
+                //        check = false;
+                //    }
+                //}
+                if (SaveEvent != null)// && check)
                 {
                     SaveEvent(saveFileDialog1.FileName);
                 }
