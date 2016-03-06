@@ -142,7 +142,9 @@ namespace SpreadsheetGUI
         /// </summary>
         public event Action<int, int> ChangeSelection;
 
-
+        /// <summary>
+        /// Event that occurs when the user closes the form and there are unsaved changes.
+        /// </summary>
         public event Action SaveClose;
 
         /// <summary>
@@ -314,11 +316,17 @@ namespace SpreadsheetGUI
                    + "NOTE:  You must press enter or the new contents will not be saved.");
         }
 
+        /// <summary>
+        /// Occurs when the form is closing.  It calls the SaveClose event.  This event will allow the controler to check whether there are
+        /// unsaved changes.  If so, then the form will prompt the user asking if they want to save the changes.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if(saveClose != null)
+            if(SaveClose != null)
             {
-                saveClose();
+                SaveClose();
             }
         }
     }

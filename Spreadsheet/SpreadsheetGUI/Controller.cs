@@ -41,7 +41,7 @@ namespace SpreadsheetGUI
             window.SaveEvent += HandleSave;
             window.ChangeContents += HandleChangeContents;
             window.ChangeSelection += HandleChangeSelection;
-            window.saveClose += HandleSaveClose;
+            window.SaveClose += HandleSaveClose;
 
         }
 
@@ -66,7 +66,7 @@ namespace SpreadsheetGUI
                 window.SaveEvent += HandleSave;
                 window.ChangeContents += HandleChangeContents;
                 window.ChangeSelection += HandleChangeSelection;
-                window.saveClose += HandleSaveClose;
+                window.SaveClose += HandleSaveClose;
                 createSheet();
             }
             catch(Exception e)
@@ -169,13 +169,16 @@ namespace SpreadsheetGUI
             window.OpenNew();
         }
 
+        /// <summary>
+        /// Method that is triggered when the Close event is triggered.  Calls the window method that closes the current window.
+        /// </summary>
         private void HandleClose()
         {
             window.DoClose();
         }
 
         /// <summary>
-        /// Method that is trigged when the closeEvent is triggered.  If the spreadsheet have been changed and not saved, it calls the window method
+        /// Method that is trigged when the CloseSave event is triggered.  If the spreadsheet have been changed and not saved, it calls the window method
         /// that asks if the user wants to save.  Then it closes the window that is paired with the controller.  
         /// </summary>
         private void HandleSaveClose()

@@ -34,7 +34,7 @@ namespace SpreadsheetGUI
         /// </summary>
         event Action<int, int> ChangeSelection;
 
-        event Action saveClose;
+        event Action SaveClose;
 
         /// <summary>
         /// Property that sets and gets the title of the current window.
