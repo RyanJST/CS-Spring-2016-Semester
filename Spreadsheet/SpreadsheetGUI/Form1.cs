@@ -142,6 +142,9 @@ namespace SpreadsheetGUI
         /// </summary>
         public event Action<int, int> ChangeSelection;
 
+
+        public event Action SaveClose;
+
         /// <summary>
         /// occurs when the form is loaded, selects the cell A1 and makes it the currently selected cell.
         /// </summary>
@@ -237,18 +240,10 @@ namespace SpreadsheetGUI
         {
             SaveFileDialog test = saveFileDialog1;
             DialogResult result = saveFileDialog1.ShowDialog();
-            //bool check = true;
             
             if (result == DialogResult.Yes || result == DialogResult.OK)
             {
-                //if (saveFileDialog1.FileName != Text && File.Exists(saveFileDialog1.FileName))
-                //{
-                //    if (MessageBox.Show(saveFileDialog1.FileName + " already exists." + "\n" + "Do you wish to overwrite it?", "CheckFile", MessageBoxButtons.YesNo) != DialogResult.Yes)
-                //    {
-                //        check = false;
-                //    }
-                //}
-                if (SaveEvent != null)// && check)
+                if (SaveEvent != null)
                 {
                     SaveEvent(saveFileDialog1.FileName);
                 }
@@ -318,5 +313,14 @@ namespace SpreadsheetGUI
                    "\n" + "Hit Enter to confirm the new contents and The Spreadsheet will update automatically." + "\n"
                    + "NOTE:  You must press enter or the new contents will not be saved.");
         }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if(saveClose != null)
+            {
+                saveClose();
+            }
+        }
     }
+
 }

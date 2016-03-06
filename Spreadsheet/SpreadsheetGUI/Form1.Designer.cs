@@ -35,6 +35,8 @@
             this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openItem = new System.Windows.Forms.ToolStripMenuItem();
             this.closeItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.seeHelpContentsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.fileDialog = new System.Windows.Forms.OpenFileDialog();
             this.cellNameBox = new System.Windows.Forms.TextBox();
             this.CellValueBox = new System.Windows.Forms.TextBox();
@@ -43,8 +45,6 @@
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
-            this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.seeHelpContentsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -81,30 +81,45 @@
             // newItem
             // 
             this.newItem.Name = "newItem";
-            this.newItem.Size = new System.Drawing.Size(152, 22);
+            this.newItem.Size = new System.Drawing.Size(112, 22);
             this.newItem.Text = "New";
             this.newItem.Click += new System.EventHandler(this.newItem_Click_1);
             // 
             // saveToolStripMenuItem
             // 
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(112, 22);
             this.saveToolStripMenuItem.Text = "Save";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
             // openItem
             // 
             this.openItem.Name = "openItem";
-            this.openItem.Size = new System.Drawing.Size(152, 22);
+            this.openItem.Size = new System.Drawing.Size(112, 22);
             this.openItem.Text = "Open...";
             this.openItem.Click += new System.EventHandler(this.openItem_Click_1);
             // 
             // closeItem
             // 
             this.closeItem.Name = "closeItem";
-            this.closeItem.Size = new System.Drawing.Size(152, 22);
+            this.closeItem.Size = new System.Drawing.Size(112, 22);
             this.closeItem.Text = "Close";
             this.closeItem.Click += new System.EventHandler(this.closeItem_Click_1);
+            // 
+            // helpToolStripMenuItem
+            // 
+            this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.seeHelpContentsToolStripMenuItem});
+            this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
+            this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+            this.helpToolStripMenuItem.Text = "Help";
+            // 
+            // seeHelpContentsToolStripMenuItem
+            // 
+            this.seeHelpContentsToolStripMenuItem.Name = "seeHelpContentsToolStripMenuItem";
+            this.seeHelpContentsToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
+            this.seeHelpContentsToolStripMenuItem.Text = "See Help Contents";
+            this.seeHelpContentsToolStripMenuItem.Click += new System.EventHandler(this.seeHelpContentsToolStripMenuItem_Click);
             // 
             // fileDialog
             // 
@@ -169,21 +184,6 @@
             this.saveFileDialog1.OverwritePrompt = false;
             this.saveFileDialog1.Title = "Save File";
             // 
-            // helpToolStripMenuItem
-            // 
-            this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.seeHelpContentsToolStripMenuItem});
-            this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
-            this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
-            this.helpToolStripMenuItem.Text = "Help";
-            // 
-            // seeHelpContentsToolStripMenuItem
-            // 
-            this.seeHelpContentsToolStripMenuItem.Name = "seeHelpContentsToolStripMenuItem";
-            this.seeHelpContentsToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
-            this.seeHelpContentsToolStripMenuItem.Text = "See Help Contents";
-            this.seeHelpContentsToolStripMenuItem.Click += new System.EventHandler(this.seeHelpContentsToolStripMenuItem_Click);
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -200,6 +200,7 @@
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form1";
             this.Text = "Form1";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
