@@ -233,7 +233,7 @@ namespace SS
             nameValid = new Regex(@"^[A-Z]+[1-9][0-9]*$");
             cellNames = new Dictionary<string, Cell>();
             graph = new DependencyGraph();
-            change = false;
+            
             try {
                 using (XmlReader reader = XmlReader.Create(source, settings))
                 {
@@ -260,7 +260,8 @@ namespace SS
                     }
                 }
             }
-            catch(Exception e)
+            
+            catch (Exception e)
             {
                 if(e is InvalidNameException)
                 {
@@ -278,6 +279,7 @@ namespace SS
                     throw new SpreadsheetReadException("Formula Error ");
                 }
             }
+            change = false;
         }
 
         // ADDED FOR PS6
