@@ -113,7 +113,7 @@ namespace SpreadsheetGUI
         {
             char letter = (char)(97 + col);
             string cellName = letter.ToString().ToUpper() + (row + 1).ToString();
-            string cellName2 = letter.ToString().ToUpper() + (row).ToString();
+            
             try {
                 foreach (string cell in sheet.SetContentsOfCell(cellName, obj))
                 {
@@ -129,7 +129,8 @@ namespace SpreadsheetGUI
             }
             catch(Exception e)
             {
-                window.Message = "Unable to do change " + e.Message; 
+                window.Message = "Unable to do change " + e.Message;
+                window.cellContentsMainBox = sheet.GetCellContents(cellName).ToString(); 
             }
                 window.cellValueMainBox = sheet.GetCellValue(cellName).ToString();
         }

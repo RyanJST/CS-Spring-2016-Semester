@@ -63,6 +63,11 @@ namespace ControllerTester
             get; private set;
         }
 
+        public bool CalledMessage
+        {
+            get; private set;
+        }
+
         public bool CalledMessageYesNo
         {
             get; private set;
@@ -160,7 +165,7 @@ namespace ControllerTester
         {
             set
             {
-                
+                CalledMessage = true;
             }
         }
 

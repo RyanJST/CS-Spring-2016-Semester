@@ -125,5 +125,13 @@ namespace ControllerTester
 
             Assert.AreEqual("= 54 * 10 ", stub.getCellContents);
         }
+
+        public void TestMethod9()
+        {
+            SpreadSheetStub stub = new SpreadSheetStub();
+            Controller control = new Controller(stub, "D:\\NonExistantDive\\Test2.ss");
+
+            Assert.IsTrue(stub.CalledMessage);
+        }
     }
 }
