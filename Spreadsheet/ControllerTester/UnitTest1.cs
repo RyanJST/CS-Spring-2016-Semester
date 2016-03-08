@@ -126,12 +126,55 @@ namespace ControllerTester
             Assert.AreEqual("= 54 * 10 ", stub.getCellContents);
         }
 
+        [TestMethod]
         public void TestMethod9()
         {
             SpreadSheetStub stub = new SpreadSheetStub();
             Controller control = new Controller(stub, "D:\\NonExistantDive\\Test2.ss");
 
             Assert.IsTrue(stub.CalledMessage);
+        }
+
+        [TestMethod]
+        public void TestMethod10()
+         {
+            SpreadSheetStub stub = new SpreadSheetStub();
+            Controller control = new Controller(stub);
+
+            stub.FireChangeSelection(0, 0);
+
+            Assert.AreEqual("A1", stub.getCellName);
+            Assert.AreEqual("", stub.getCellValue);
+            Assert.AreEqual("", stub.getCellContents);
+
+            stub.FireChangeContents("= 54 * 10", 0, 0);
+
+            Assert.AreEqual("A1", stub.getCellName);
+            Assert.AreEqual("540", stub.getCellValue);
+
+            stub.FireChangeSelection(0, 0);
+
+            Assert.AreEqual("= 54 * 10 ", stub.getCellContents);
+
+            stub.FireChangeContents("= A1", 0, 0);
+
+            Assert.IsTrue(stub.CalledMessage);
+
+            stub.FireChangeSelection(0, 0);
+
+            Assert.AreEqual("= 54 * 10 ", stub.getCellContents);
+        }
+
+        [TestMethod]
+        public void TestMethod11()
+        {
+            SpreadSheetStub stub = new SpreadSheetStub();
+            Controller control = new Controller(stub);
+
+            stub.FireSaveEvent("D:\\NonExistantDrive\\Test10.ss");
+
+            Assert.IsTrue(stub.CalledMessage);
+            
         }
     }
 }
